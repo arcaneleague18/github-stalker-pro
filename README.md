@@ -1,13 +1,13 @@
-# 🤖 GitHub Insight AI
+# 🤖 Github Stalker pro
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.36+-FF4B4B.svg)](https://streamlit.io)
 [![Model Context Protocol](https://img.shields.io/badge/MCP-Enabled-8A2BE2.svg)](https://modelcontextprotocol.io)
 [![OpenAI Responses API](https://img.shields.io/badge/OpenAI-GPT--5.5-412991.svg)](https://openai.com)
 
-**GitHub Insight AI** is a production-quality AI web application built with Streamlit that allows developers to enter any public GitHub username and chat with an AI assistant capable of answering deep architectural and software engineering questions about that account.
+**Github Stalker pro** is a production-quality AI web application built with Streamlit that allows developers to enter any public GitHub username and chat with an AI assistant capable of answering deep architectural and software engineering questions about that account.
 
-Unlike traditional AI applications, **GitHub Insight AI does NOT use a RAG (Retrieval-Augmented Generation) pipeline, vector databases, or embeddings**. Instead, it dynamically connects to the **GitHub MCP (Model Context Protocol) Server**, allowing the OpenAI model to autonomously invoke tools in real-time to inspect repository trees, read source code, analyze READMEs, and review commits.
+Unlike traditional AI applications,it dynamically connects to the **GitHub MCP (Model Context Protocol) Server**, allowing the OpenAI model to autonomously invoke tools in real-time to inspect repository trees, read source code, analyze READMEs, and review commits.
 
 ---
 

@@ -1,4 +1,4 @@
-"""Backend services package for GitHub Insight AI."""
+"""Backend services package for Github Stalker pro."""
 from .mcp_service import mcp_client, MCPClient
 from .github_service import github_service, GitHubService
 from .openai_service import openai_service, OpenAIService

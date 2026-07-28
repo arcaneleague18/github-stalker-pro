@@ -22,7 +22,7 @@ def render_welcome_screen():
         """
         <div style="text-align:center; padding:3rem 1rem; max-width:850px; margin:0 auto;">
             <h1 style="font-size:3rem; font-weight:700; background:linear-gradient(135deg, #58a6ff 0%, #a371f7 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:1rem;">
-                GitHub Insight AI
+                Github Stalker pro
             </h1>
             <p style="font-size:1.25rem; color:#8b949e; line-height:1.6; margin-bottom:2.5rem;">
                 A production-grade AI engineering platform powered by the <b>Model Context Protocol (MCP)</b>.

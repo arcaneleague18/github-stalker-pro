@@ -26,7 +26,7 @@ class OpenAIService:
                 client_kwargs["base_url"] = base_url
                 client_kwargs["default_headers"] = {
                     "HTTP-Referer": "https://github.com/github-insight-ai",
-                    "X-Title": "GitHub Insight AI"
+                    "X-Title": "Github Stalker pro"
                 }
                 logger.info(f"Configured OpenAI/OpenRouter client with base URL: {base_url}")
             

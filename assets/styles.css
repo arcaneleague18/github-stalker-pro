@@ -1,11 +1,13 @@
 /* ==========================================
-   GitHub Insight AI - Premium Dark Theme
+   Github Stalker pro - Premium Dark Theme
    ========================================== */
 
 /* Global Reset & Typography */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-html, body, [class*="css"] {
+html,
+body,
+[class*="css"] {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
     background-color: #0d1117 !important;
     color: #e6edf3 !important;
@@ -23,13 +25,16 @@ html, body, [class*="css"] {
     width: 8px;
     height: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: #0d1117;
 }
+
 ::-webkit-scrollbar-thumb {
     background: #30363d;
     border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #58a6ff;
 }
@@ -260,7 +265,7 @@ html, body, [class*="css"] {
 /* ==========================================
    Streamlit Custom Buttons & Controls
    ========================================== */
-.stButton > button {
+.stButton>button {
     background: linear-gradient(135deg, #1f6feb 0%, #238636 100%);
     color: #ffffff !important;
     border: none !important;
@@ -273,34 +278,36 @@ html, body, [class*="css"] {
     width: 100%;
 }
 
-.stButton > button:hover {
+.stButton>button:hover {
     background: linear-gradient(135deg, #388bfd 0%, #2ea043 100%) !important;
     box-shadow: 0 6px 20px rgba(56, 139, 253, 0.5) !important;
     transform: translateY(-1px);
 }
 
 /* Secondary Button styling */
-button[kind="secondaryFormSubmit"], button[kind="secondary"] {
+button[kind="secondaryFormSubmit"],
+button[kind="secondary"] {
     background: rgba(33, 38, 45, 0.8) !important;
     border: 1px solid #30363d !important;
     box-shadow: none !important;
     color: #c9d1d9 !important;
 }
 
-button[kind="secondaryFormSubmit"]:hover, button[kind="secondary"]:hover {
+button[kind="secondaryFormSubmit"]:hover,
+button[kind="secondary"]:hover {
     background: #30363d !important;
     border-color: #8b949e !important;
     color: #ffffff !important;
 }
 
 /* Chat Input Styling */
-.stChatInput > div {
+.stChatInput>div {
     background-color: #161b22 !important;
     border: 1px solid #30363d !important;
     border-radius: 12px !important;
 }
 
-.stChatInput > div:focus-within {
+.stChatInput>div:focus-within {
     border-color: #58a6ff !important;
     box-shadow: 0 0 10px rgba(88, 166, 255, 0.3) !important;
 }
@@ -318,15 +325,24 @@ button[kind="secondaryFormSubmit"]:hover, button[kind="secondary"]:hover {
 }
 
 /* Code Blocks */
-pre, code {
+pre,
+code {
     font-family: 'JetBrains Mono', monospace !important;
 }
 
 /* Animations */
 @keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
 }
 
 .status-pulse {

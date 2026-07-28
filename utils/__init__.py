@@ -1,4 +1,4 @@
-"""Utility modules for GitHub Insight AI."""
+"""Utility modules for Github Stalker pro."""
 from .logger import get_logger
 from .helpers import (
     format_number,

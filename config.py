@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     
     # App Settings
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
-    app_title: str = Field(default="GitHub Insight AI", alias="APP_TITLE")
+    app_title: str = Field(default="Github Stalker pro", alias="APP_TITLE")
     
     model_config = SettingsConfigDict(
         env_file=".env",

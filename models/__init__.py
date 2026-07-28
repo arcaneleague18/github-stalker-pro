@@ -1,4 +1,4 @@
-"""Pydantic data models for GitHub Insight AI."""
+"""Pydantic data models for Github Stalker pro."""
 from .github_models import (
     GitHubUser,
     Repository,

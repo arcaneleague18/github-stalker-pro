@@ -1,4 +1,4 @@
-"""Verification script for GitHub Insight AI models, configuration, and services."""
+"""Verification script for Github Stalker pro models, configuration, and services."""
 import sys
 from utils import get_logger, format_number, get_language_color
 from models import GitHubUser, Repository, RepoStats, MCPToolDefinition
@@ -61,7 +61,7 @@ def test_services():
     logger.info(f"✅ Services initialized. Available MCP tools count: {len(mcp_client.tools)}")
 
 def main():
-    logger.info("=== Starting GitHub Insight AI Verification Tests ===")
+    logger.info("=== Starting Github Stalker pro Verification Tests ===")
     try:
         test_models()
         test_helpers()
