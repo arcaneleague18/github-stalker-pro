@@ -1,0 +1,334 @@
+/* ==========================================
+   GitHub Insight AI - Premium Dark Theme
+   ========================================== */
+
+/* Global Reset & Typography */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: #0d1117 !important;
+    color: #e6edf3 !important;
+}
+
+/* Streamlit Main Container Adjustment */
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1400px !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0d1117;
+}
+::-webkit-scrollbar-thumb {
+    background: #30363d;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #58a6ff;
+}
+
+/* ==========================================
+   Glassmorphism Cards & Panels
+   ========================================== */
+.glass-card {
+    background: rgba(22, 27, 34, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(48, 54, 61, 0.6);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    margin-bottom: 1.5rem;
+}
+
+.glass-card:hover {
+    border-color: rgba(88, 166, 255, 0.5);
+    box-shadow: 0 12px 40px 0 rgba(88, 166, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+/* ==========================================
+   Profile Card Styling
+   ========================================== */
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(22, 27, 34, 0.85) 0%, rgba(13, 17, 23, 0.95) 100%);
+    border: 1px solid #30363d;
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(88, 166, 255, 0.1) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.profile-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 3px solid #58a6ff;
+    padding: 4px;
+    background: #0d1117;
+    box-shadow: 0 0 25px rgba(88, 166, 255, 0.4);
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover {
+    transform: scale(1.05) rotate(3deg);
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    color: #ffffff;
+    z-index: 1;
+}
+
+.profile-username {
+    font-size: 1.1rem;
+    color: #58a6ff;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    z-index: 1;
+}
+
+.profile-bio {
+    font-size: 0.95rem;
+    color: #8b949e;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    z-index: 1;
+}
+
+.profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: #c9d1d9;
+    z-index: 1;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(48, 54, 61, 0.4);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid rgba(240, 246, 252, 0.1);
+}
+
+/* ==========================================
+   Metric Boxes & Badges
+   ========================================== */
+.metric-box {
+    background: rgba(22, 27, 34, 0.6);
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.metric-box:hover {
+    border-color: #58a6ff;
+    background: rgba(30, 37, 46, 0.8);
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 0.2rem;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 12px;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: rgba(56, 139, 253, 0.15);
+    color: #58a6ff;
+    border: 1px solid rgba(56, 139, 253, 0.4);
+}
+
+.badge-language {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(22, 27, 34, 0.9);
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+}
+
+.lang-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* ==========================================
+   Repository Cards
+   ========================================== */
+.repo-card {
+    background: rgba(22, 27, 34, 0.7);
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.25rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+}
+
+.repo-card:hover {
+    border-color: #58a6ff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.repo-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #58a6ff;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.repo-desc {
+    font-size: 0.85rem;
+    color: #8b949e;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.repo-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #8b949e;
+    border-top: 1px solid rgba(48, 54, 61, 0.5);
+    padding-top: 0.75rem;
+}
+
+/* ==========================================
+   Streamlit Custom Buttons & Controls
+   ========================================== */
+.stButton > button {
+    background: linear-gradient(135deg, #1f6feb 0%, #238636 100%);
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.6rem 1.2rem !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(31, 111, 235, 0.3) !important;
+    width: 100%;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, #388bfd 0%, #2ea043 100%) !important;
+    box-shadow: 0 6px 20px rgba(56, 139, 253, 0.5) !important;
+    transform: translateY(-1px);
+}
+
+/* Secondary Button styling */
+button[kind="secondaryFormSubmit"], button[kind="secondary"] {
+    background: rgba(33, 38, 45, 0.8) !important;
+    border: 1px solid #30363d !important;
+    box-shadow: none !important;
+    color: #c9d1d9 !important;
+}
+
+button[kind="secondaryFormSubmit"]:hover, button[kind="secondary"]:hover {
+    background: #30363d !important;
+    border-color: #8b949e !important;
+    color: #ffffff !important;
+}
+
+/* Chat Input Styling */
+.stChatInput > div {
+    background-color: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 12px !important;
+}
+
+.stChatInput > div:focus-within {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 10px rgba(88, 166, 255, 0.3) !important;
+}
+
+/* Tool execution expander badge */
+.tool-status-badge {
+    background: #1f242c;
+    border-left: 4px solid #a371f7;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: #d2a8ff;
+}
+
+/* Code Blocks */
+pre, code {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.status-pulse {
+    animation: pulse 2s infinite ease-in-out;
+}
