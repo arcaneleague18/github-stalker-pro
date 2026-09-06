@@ -8,29 +8,21 @@ from models import ToolCallLog
 logger = get_logger(__name__)
 
 class OpenAIService:
-    """Manages communication, streaming, and tool calling with the OpenAI API."""
+    """Manages communication, streaming, and tool calling with the local LLM proxy."""
 
     def __init__(self):
         self._client: Optional[openai.OpenAI] = None
 
     def get_client(self) -> openai.OpenAI:
-        """Initialize and return the OpenAI/OpenRouter client."""
+        """Initialize and return the OpenAI-compatible client pointing to the local model proxy."""
         if self._client is None:
-            api_key = settings.get_openai_api_key()
-            if not api_key:
-                raise ValueError("API Key is missing. Please set OPENROUTER_API_KEY in your .env file.")
-            
             base_url = settings.get_base_url()
-            client_kwargs = {"api_key": api_key}
-            if base_url:
-                client_kwargs["base_url"] = base_url
-                client_kwargs["default_headers"] = {
-                    "HTTP-Referer": "https://github.com/github-insight-ai",
-                    "X-Title": "Github Stalker pro"
-                }
-                logger.info(f"Configured OpenAI/OpenRouter client with base URL: {base_url}")
+            logger.info(f"Configured LLM client with local model proxy at: {base_url}")
             
-            self._client = openai.OpenAI(**client_kwargs)
+            self._client = openai.OpenAI(
+                api_key="not-needed",
+                base_url=base_url
+            )
         return self._client
 
     def stream_chat_with_tools(
@@ -39,7 +31,7 @@ class OpenAIService:
         tools: list[dict[str, Any]],
         model: Optional[str] = None
     ) -> Generator[str | list[ToolCallLog], None, None]:
-        """Stream a chat completion response from OpenAI with MCP tool calling support.
+        """Stream a chat completion response from the local LLM with MCP tool calling support.
         
         Yields:
             str: Text chunks as they arrive from the streaming response.
@@ -48,7 +40,7 @@ class OpenAIService:
         client = self.get_client()
         target_model = model or settings.openai_model
 
-        logger.info(f"Initiating OpenAI stream using model '{target_model}' with {len(tools)} available MCP tools")
+        logger.info(f"Initiating LLM stream using model '{target_model}' with {len(tools)} available MCP tools")
 
         try:
             # Prepare arguments; omit tools parameter if list is empty
@@ -113,26 +105,18 @@ class OpenAIService:
                             status="running"
                         )
                     )
-                logger.info(f"OpenAI model generated {len(tool_logs)} MCP tool call request(s)")
+                logger.info(f"LLM generated {len(tool_logs)} MCP tool call request(s)")
                 yield tool_logs
 
         except openai.AuthenticationError:
-            yield "\n\n❌ **Authentication Error:** Invalid OpenAI API Key. Please verify `OPENAI_API_KEY` in your `.env` file."
+            yield "\n\n**Authentication Error:** The local model proxy rejected the request. Check your proxy configuration."
         except openai.RateLimitError:
-            yield "\n\n⏳ **Rate Limit Exceeded:** You have hit the rate limit or quota for your OpenAI account. Please try again later."
-        except openai.NotFoundError:
-            # Fallback if specific model like gpt-5.5 is not available to the user yet
-            if target_model != "gpt-4o":
-                logger.warning(f"Model '{target_model}' not found or unavailable. Falling back to 'gpt-4o'")
-                yield f"\n\n⚠️ *Model `{target_model}` unavailable. Automatically falling back to `gpt-4o`...*\n\n"
-                yield from self.stream_chat_with_tools(messages, tools, model="gpt-4o")
-            else:
-                yield f"\n\n❌ **Model Error:** The requested OpenAI model `{target_model}` was not found."
+            yield "\n\n**Rate Limit Exceeded:** The model proxy rate limited the request. Please try again later."
         except openai.APIConnectionError:
-            yield "\n\n🌐 **Network Error:** Could not connect to OpenAI API. Please check your internet connection."
+            yield "\n\n**Connection Error:** Could not connect to the local model proxy at " + settings.get_base_url() + ". Make sure it is running."
         except Exception as e:
-            logger.error(f"OpenAI streaming error: {e}")
-            yield f"\n\n❌ **An unexpected error occurred:** {format_error_message(e)}"
+            logger.error(f"LLM streaming error: {e}")
+            yield f"\n\n**An unexpected error occurred:** {format_error_message(e)}"
 
 # Global OpenAI service instance
 openai_service = OpenAIService()

@@ -72,10 +72,9 @@ cp .env.example .env
 ```
 Open `.env` in your editor and configure your secrets:
 ```ini
-# LLM API Configuration (OpenRouter)
-OPENROUTER_API_KEY="sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-OPENAI_BASE_URL="https://openrouter.ai/api/v1"
-OPENAI_MODEL="openai/gpt-4o"
+# LLM API Configuration (Local Model Proxy)
+OPENAI_BASE_URL="http://localhost:4000/openai/v1"
+OPENAI_MODEL="vscode-lm-proxy"
 
 # GitHub Personal Access Token (Required for MCP & API access)
 # Create a token with 'repo', 'read:user', and 'read:org' scopes at https://github.com/settings/tokens
@@ -188,3 +187,4 @@ github-insight-ai/
 ## 📄 License
 
 This project is open-source and developed as an advanced AI engineering demonstration of the **Model Context Protocol (MCP)**.
+

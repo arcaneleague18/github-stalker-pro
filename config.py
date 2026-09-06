@@ -11,10 +11,9 @@ load_dotenv(override=True)
 class Settings(BaseSettings):
     """Application configuration loaded from environment variables and .env file."""
     
-    # LLM API settings (OpenRouter)
-    openrouter_api_key: Optional[SecretStr] = Field(default=None, alias="OPENROUTER_API_KEY")
-    openai_base_url: Optional[str] = Field(default="https://openrouter.ai/api/v1", alias="OPENAI_BASE_URL")
-    openai_model: str = Field(default="openai/gpt-oss-20b:free", alias="OPENAI_MODEL")
+    # LLM API settings (Local Model Proxy)
+    openai_base_url: str = Field(default="http://localhost:4000/openai/v1", alias="OPENAI_BASE_URL")
+    openai_model: str = Field(default="vscode-lm-proxy", alias="OPENAI_MODEL")
     
     # GitHub credentials
     github_pat: Optional[SecretStr] = Field(default=None, alias="GITHUB_PERSONAL_ACCESS_TOKEN")
@@ -35,15 +34,9 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    def get_openai_api_key(self) -> str:
-        """Safe getter for LLM API Key (OPENROUTER_API_KEY)."""
-        if self.openrouter_api_key:
-            return self.openrouter_api_key.get_secret_value()
-        return os.environ.get("OPENROUTER_API_KEY", "")
-
     def get_base_url(self) -> str:
-        """Get API base URL."""
-        return self.openai_base_url or os.environ.get("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
+        """Get API base URL for the local model proxy."""
+        return self.openai_base_url or os.environ.get("OPENAI_BASE_URL", "http://localhost:4000/openai/v1")
 
     def get_github_pat(self) -> str:
         """Safe getter for GitHub Personal Access Token."""
@@ -54,8 +47,6 @@ class Settings(BaseSettings):
     def validate_config(self) -> tuple[bool, list[str]]:
         """Validate if required configuration settings are present."""
         errors = []
-        if not self.get_openai_api_key():
-            errors.append("LLM API Key is missing. Please set OPENROUTER_API_KEY in your .env file.")
         if not self.get_github_pat():
             errors.append("GITHUB_PERSONAL_ACCESS_TOKEN is missing. Please set it in your .env file or environment.")
         return len(errors) == 0, errors
