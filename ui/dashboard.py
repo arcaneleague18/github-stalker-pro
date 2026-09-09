@@ -1,5 +1,4 @@
 import streamlit as st
-from utils.icons import ICONS
 import pandas as pd
 import altair as alt
 from services import github_service, session_service
@@ -26,31 +25,30 @@ def render_dashboard(username: str):
     # 1. Profile Banner & Metadata
     # ==========================================
     avatar = user.avatar_url or "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-    _bldg = ICONS["building"]
-    company = f'<img src="{_bldg}"> {user.company}' if user.company else ""
-    _mpin = ICONS["map_pin"]
-    location = f'<img src="{_mpin}"> {user.location}' if user.location else ""
-    _lnk = ICONS["link"]
-    blog = f'<img src="{_lnk}"> <a href="{user.blog}" target="_blank" style="color:#58a6ff;">Website</a>' if user.blog else ""
-    
-    st.markdown(
-        f"""
-        <div class="profile-card">
-            <img src="{avatar}" class="profile-avatar" alt="Avatar"/>
-            <div class="profile-name">{user.display_name}</div>
-            <div class="profile-username"><a href="https://github.com/{user.login}" target="_blank" style="color:#58a6ff; text-decoration:none;">@{user.login}</a></div>
-            <div class="profile-bio">{user.bio or 'No biographical summary provided.'}</div>
-            <div class="profile-meta">
-                <span class="meta-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4Yjk0OWUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgMjF2LTJhNCA0IDAgMCAwLTQtNEg2YTQgNCAwIDAgMC00IDR2MiIvPjxjaXJjbGUgY3g9IjkiIGN5PSI3IiByPSI0Ii8+PHBhdGggZD0iTTIyIDIxdi0yYTQgNCAwIDAgMC0zLTMuODciLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PC9zdmc+"> <b>{format_number(user.followers)}</b> Followers</span>
-                <span class="meta-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4Yjk0OWUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgMjF2LTJhNCA0IDAgMCAwLTQtNEg2YTQgNCAwIDAgMC00IDR2MiIvPjxjaXJjbGUgY3g9IjkiIGN5PSI3IiByPSI0Ii8+PHBhdGggZD0iTTIyIDIxdi0yYTQgNCAwIDAgMC0zLTMuODciLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PC9zdmc+"> <b>{format_number(user.following)}</b> Following</span>
-                {f'<span class="meta-item">{company}</span>' if company else ''}
-                {f'<span class="meta-item">{location}</span>' if location else ''}
-                {f'<span class="meta-item">{blog}</span>' if blog else ''}
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    bio = user.bio or "No biographical summary provided."
+
+    # Build meta items list
+    meta_parts = []
+    meta_parts.append(f'<span class="meta-item"><b>{format_number(user.followers)}</b> Followers</span>')
+    meta_parts.append(f'<span class="meta-item"><b>{format_number(user.following)}</b> Following</span>')
+    if user.company:
+        meta_parts.append(f'<span class="meta-item">{user.company}</span>')
+    if user.location:
+        meta_parts.append(f'<span class="meta-item">{user.location}</span>')
+    if user.blog:
+        meta_parts.append(f'<span class="meta-item"><a href="{user.blog}" target="_blank" style="color:#58a6ff;">Website</a></span>')
+    meta_html = " ".join(meta_parts)
+
+    profile_html = (
+        f'<div class="profile-card">'
+        f'<img src="{avatar}" class="profile-avatar" alt="Avatar"/>'
+        f'<div class="profile-name">{user.display_name}</div>'
+        f'<div class="profile-username"><a href="https://github.com/{user.login}" target="_blank" style="color:#58a6ff; text-decoration:none;">@{user.login}</a></div>'
+        f'<div class="profile-bio">{bio}</div>'
+        f'<div class="profile-meta">{meta_html}</div>'
+        f'</div>'
     )
+    st.markdown(profile_html, unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -61,7 +59,7 @@ def render_dashboard(username: str):
     with m_col1:
         st.markdown(f'<div class="metric-box"><div class="metric-value">{stats.total_repos}</div><div class="metric-label">Public Repositories</div></div>', unsafe_allow_html=True)
     with m_col2:
-        st.markdown(f'<div class="metric-box"><div class="metric-value"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZTNiMzQxIiBzdHJva2U9IiNlM2IzNDEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWdvbiBwb2ludHM9IjEyIDIgMTUuMDkgOC4yNiAyMiA5LjI3IDE3IDE0LjE0IDE4LjE4IDIxLjAyIDEyIDE3Ljc3IDUuODIgMjEuMDIgNyAxNC4xNCAyIDkuMjcgOC45MSA4LjI2IDEyIDIiLz48L3N2Zz4="> {format_number(stats.total_stars)}</div><div class="metric-label">Total Stars</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="metric-value">&#9733; {format_number(stats.total_stars)}</div><div class="metric-label">Total Stars</div></div>', unsafe_allow_html=True)
     with m_col3:
         st.markdown(f'<div class="metric-box"><div class="metric-value">⑂ {format_number(stats.total_forks)}</div><div class="metric-label">Total Forks</div></div>', unsafe_allow_html=True)
     with m_col4:

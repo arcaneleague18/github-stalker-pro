@@ -38,7 +38,7 @@ def render_welcome_screen():
         st.markdown(
             """
             <div class="glass-card" style="text-align:center; height:100%;">
-                <div style="font-size:2.5rem; margin-bottom:0.8rem;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMzcxZjciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgOFY0SDgiLz48cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHg9IjQiIHk9IjgiIHJ4PSIyIi8+PHBhdGggZD0iTTIgMTRoMiIvPjxwYXRoIGQ9Ik0yMCAxNGgyIi8+PHBhdGggZD0iTTE1IDEzdjIiLz48cGF0aCBkPSJNOSAxM3YyIi8+PC9zdmc+"></div>
+                <div style="font-size:2.5rem; margin-bottom:0.8rem;">&#9881;</div>
                 <h3 style="color:#e6edf3; font-size:1.2rem; margin-bottom:0.5rem;">Dynamic MCP Tooling</h3>
                 <p style="color:#8b949e; font-size:0.9rem; line-height:1.5;">
                     The OpenAI LLM autonomously calls GitHub MCP tools in real-time to inspect repository trees, read files, and check commits.
@@ -51,7 +51,7 @@ def render_welcome_screen():
         st.markdown(
             """
             <div class="glass-card" style="text-align:center; height:100%;">
-                <div style="font-size:2.5rem; margin-bottom:0.8rem;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1OGE2ZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSI5IiB4PSIzIiB5PSIzIiByeD0iMSIvPjxyZWN0IHdpZHRoPSI3IiBoZWlnaHQ9IjUiIHg9IjE0IiB5PSIzIiByeD0iMSIvPjxyZWN0IHdpZHRoPSI3IiBoZWlnaHQ9IjkiIHg9IjE0IiB5PSIxMiIgcng9IjEiLz48cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSI1IiB4PSIzIiB5PSIxNiIgcng9IjEiLz48L3N2Zz4="></div>
+                <div style="font-size:2.5rem; margin-bottom:0.8rem;">&#9783;</div>
                 <h3 style="color:#e6edf3; font-size:1.2rem; margin-bottom:0.5rem;">Rich Visual Dashboard</h3>
                 <p style="color:#8b949e; font-size:0.9rem; line-height:1.5;">
                     Comprehensive profile cards, star/fork metrics, language distribution charts, and organization memberships at a glance.
@@ -64,7 +64,7 @@ def render_welcome_screen():
         st.markdown(
             """
             <div class="glass-card" style="text-align:center; height:100%;">
-                <div style="font-size:2.5rem; margin-bottom:0.8rem;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlNmVkZjMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUgMjJ2LTRhNC44IDQuOCAwIDAgMC0xLTMuNWMzIDAgNi0yIDYtNS41LjA4LTEuMjUtLjI3LTIuNDgtMS0zLjUuMjgtMS4xNS4yOC0yLjM1IDAtMy41IDAgMC0xIDAtMyAxLjUtMi42NC0uNS01LjM2LS41LTggMEM2IDIgNSAyIDUgMmMtLjMgMS4xNS0uMyAyLjM1IDAgMy41QTUuNDAzIDUuNDAzIDAgMCAwIDQgOWMwIDMuNSAzIDUuNSA2IDUuNS0uMzkuNDktLjY4IDEuMDUtLjg1IDEuNjUtLjE3LjYtLjIyIDEuMjMtLjE1IDEuODV2NCIvPjxwYXRoIGQ9Ik05IDE4Yy00LjUxIDItNS0yLTctMiIvPjwvc3ZnPg=="></div>
+                <div style="font-size:2.5rem; margin-bottom:0.8rem;">&#10094;/&#10095;</div>
                 <h3 style="color:#e6edf3; font-size:1.2rem; margin-bottom:0.5rem;">Deep AI Architecture Chat</h3>
                 <p style="color:#8b949e; font-size:0.9rem; line-height:1.5;">
                     Ask architectural questions, locate specific tech stacks (Docker, FastAPI, React), and summarize developer contributions.
