@@ -30,7 +30,7 @@ def render_sidebar():
             unsafe_allow_html=True
         )
 
-        st.subheader("👤 Account Target")
+        st.subheader(" Account Target")
 
         current_user = session_service.current_username
 
@@ -47,20 +47,20 @@ def render_sidebar():
 
             col1, col2 = st.columns(2)
             with col1:
-                if st.button("🔄 Change User", use_container_width=True):
+                if st.button(" Change User", use_container_width=True):
                     session_service.set_username(None)
                     st.rerun()
             with col2:
-                if st.button("🗑️ Clear Chat", use_container_width=True):
+                if st.button("️ Clear Chat", use_container_width=True):
                     session_service.clear_chat()
-                    st.toast("Conversation history cleared!", icon="🧹")
+                    st.toast("Conversation history cleared!")
                     st.rerun()
 
-            if st.button("🔄 Refresh Data", use_container_width=True):
+            if st.button(" Refresh Data", use_container_width=True):
                 with st.spinner("Refreshing account metrics..."):
                     github_service.clear_cache(current_user)
                     github_service.get_dashboard_metrics(current_user, force_refresh=True)
-                st.toast("Data refreshed successfully!", icon="✅")
+                st.toast("Data refreshed successfully!")
                 st.rerun()
 
         else:
@@ -70,12 +70,12 @@ def render_sidebar():
                     placeholder="e.g. torvalds, octocat, gaearon",
                     help="Enter any public GitHub account username to analyze."
                 )
-                analyze_clicked = st.form_submit_button("🚀 Analyze Account", use_container_width=True)
+                analyze_clicked = st.form_submit_button(" Analyze Account", use_container_width=True)
 
                 if analyze_clicked:
                     if username_input and username_input.strip():
                         session_service.set_username(username_input.strip())
-                        st.toast(f"Target locked: @{username_input.strip()}", icon="🎯")
+                        st.toast(f"Target locked: @{username_input.strip()}")
                         st.rerun()
                     else:
                         st.warning("Please enter a valid GitHub username.")

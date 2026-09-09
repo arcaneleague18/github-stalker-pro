@@ -29,7 +29,7 @@ def render_chat_interface():
     # Banner showing active conversation context
     ctx_badge = f"@{username}"
     if selected_repo:
-        ctx_badge += f" / 📁 {selected_repo}"
+        ctx_badge += f" /  {selected_repo}"
 
     st.markdown(
         f"""
@@ -39,7 +39,7 @@ def render_chat_interface():
                 <strong style="color:#58a6ff; font-size:1rem;">{ctx_badge}</strong>
             </div>
             <div style="font-size:0.8rem; color:#a371f7; font-family:'JetBrains Mono',monospace;">
-                ⚡ MCP Tool Calling Enabled
+                 MCP Tool Calling Enabled
             </div>
         </div>
         """,
@@ -49,11 +49,11 @@ def render_chat_interface():
     # ==========================================
     # 1. Suggested Questions Grid
     # ==========================================
-    with st.expander("💡 Suggested AI Prompts (Click to ask)", expanded=len(session_service.messages) == 0):
+    with st.expander(" Suggested AI Prompts (Click to ask)", expanded=len(session_service.messages) == 0):
         cols = st.columns(3)
         for idx, q in enumerate(SUGGESTED_QUESTIONS):
             with cols[idx % 3]:
-                if st.button(f"👉 {q}", key=f"sug_btn_{idx}", use_container_width=True):
+                if st.button(f" {q}", key=f"sug_btn_{idx}", use_container_width=True):
                     # Record prompt in session state to trigger immediately below
                     st.session_state.pending_prompt = q
                     st.rerun()
@@ -64,16 +64,16 @@ def render_chat_interface():
     for msg in session_service.messages:
         # We only display user and assistant messages in the main UI thread
         if msg.role in ["user", "assistant"]:
-            avatar_icon = "👤" if msg.role == "user" else "🤖"
-            with st.chat_message(msg.role, avatar=avatar_icon):
+            
+            with st.chat_message(msg.role):
                 if msg.content:
                     st.markdown(msg.content, unsafe_allow_html=True)
                 
                 # Render any executed MCP tool logs in an expandable inspection block
                 if msg.tool_calls:
-                    with st.expander(f"🛠️ Executed {len(msg.tool_calls)} MCP Tool(s)", expanded=False):
+                    with st.expander(f"️ Executed {len(msg.tool_calls)} MCP Tool(s)", expanded=False):
                         for tc in msg.tool_calls:
-                            status_icon = "✅" if tc.status == "success" else "❌"
+                            status_icon = "OK" if tc.status == "success" else "ERR"
                             st.markdown(f"**{status_icon} `{tc.tool_name}`**")
                             st.code(f"Arguments: {json.dumps(tc.arguments, indent=2)}", language="json")
                             if tc.result:
@@ -91,12 +91,12 @@ def render_chat_interface():
 
     if active_prompt:
         # Display user message immediately
-        with st.chat_message("user", avatar="👤"):
+        with st.chat_message("user"):
             st.markdown(active_prompt)
         session_service.add_message("user", active_prompt)
 
         # Display AI streaming response
-        with st.chat_message("assistant", avatar="🤖"):
+        with st.chat_message("assistant"):
             status_container = st.container()
             
             with st.spinner("🤖 Analyzing repository context via Model Context Protocol..."):

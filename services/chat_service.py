@@ -1,6 +1,7 @@
 import json
 from typing import Any, Generator, Optional
 import streamlit as st
+from utils.icons import ICONS
 from models import ChatMessage, ToolCallLog
 from utils import get_logger
 from .mcp_service import mcp_client
@@ -139,7 +140,7 @@ class ChatService:
                     with status_container:
                         st.markdown(
                             f"""<div class="tool-status-badge">
-                            🛠️ Calling MCP Tool: <b>{tc.tool_name}</b><br/>
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMzcxZjciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHlsZT0idmVydGljYWwtYWxpZ246IG1pZGRsZTsiPjxwYXRoIGQ9Ik0xNC43IDYuM2ExIDEgMCAwIDAgMCAxLjRsMS42IDEuNmExIDEgMCAwIDAgMS40IDBsMy43Ny0zLjc3YTYgNiAwIDAgMS03Ljk0IDcuOTRsLTYuOTEgNi45MWEyLjEyIDIuMTIgMCAwIDEtMy0zbDYuOTEtNi45MWE2IDYgMCAwIDEgNy45NC03Ljk0bC0zLjc2IDMuNzZ6Ii8+PC9zdmc+"> Calling MCP Tool: <b>{tc.tool_name}</b><br/>
                             <span style="font-size:0.75rem; color:#8b949e;">Args: {json.dumps(tc.arguments)}</span>
                             </div>""",
                             unsafe_allow_html=True

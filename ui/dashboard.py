@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.icons import ICONS
 import pandas as pd
 import altair as alt
 from services import github_service, session_service
@@ -12,7 +13,7 @@ def render_dashboard(username: str):
         metrics = github_service.get_dashboard_metrics(username)
 
     if not metrics:
-        st.error(f"❌ Could not retrieve profile data for **@{username}**. Please check if the username exists or if your GitHub token has exceeded rate limits.")
+        st.error(f" Could not retrieve profile data for **@{username}**. Please check if the username exists or if your GitHub token has exceeded rate limits.")
         if st.button("⬅️ Back to Search"):
             session_service.set_username(None)
             st.rerun()
@@ -25,9 +26,12 @@ def render_dashboard(username: str):
     # 1. Profile Banner & Metadata
     # ==========================================
     avatar = user.avatar_url or "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-    company = f"🏢 {user.company}" if user.company else ""
-    location = f"📍 {user.location}" if user.location else ""
-    blog = f"🌐 <a href='{user.blog}' target='_blank' style='color:#58a6ff;'>Website</a>" if user.blog else ""
+    _bldg = ICONS["building"]
+    company = f'<img src="{_bldg}"> {user.company}' if user.company else ""
+    _mpin = ICONS["map_pin"]
+    location = f'<img src="{_mpin}"> {user.location}' if user.location else ""
+    _lnk = ICONS["link"]
+    blog = f'<img src="{_lnk}"> <a href="{user.blog}" target="_blank" style="color:#58a6ff;">Website</a>' if user.blog else ""
     
     st.markdown(
         f"""
@@ -37,8 +41,8 @@ def render_dashboard(username: str):
             <div class="profile-username"><a href="https://github.com/{user.login}" target="_blank" style="color:#58a6ff; text-decoration:none;">@{user.login}</a></div>
             <div class="profile-bio">{user.bio or 'No biographical summary provided.'}</div>
             <div class="profile-meta">
-                <span class="meta-item">👥 <b>{format_number(user.followers)}</b> Followers</span>
-                <span class="meta-item">👤 <b>{format_number(user.following)}</b> Following</span>
+                <span class="meta-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4Yjk0OWUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgMjF2LTJhNCA0IDAgMCAwLTQtNEg2YTQgNCAwIDAgMC00IDR2MiIvPjxjaXJjbGUgY3g9IjkiIGN5PSI3IiByPSI0Ii8+PHBhdGggZD0iTTIyIDIxdi0yYTQgNCAwIDAgMC0zLTMuODciLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PC9zdmc+"> <b>{format_number(user.followers)}</b> Followers</span>
+                <span class="meta-item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM4Yjk0OWUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTYgMjF2LTJhNCA0IDAgMCAwLTQtNEg2YTQgNCAwIDAgMC00IDR2MiIvPjxjaXJjbGUgY3g9IjkiIGN5PSI3IiByPSI0Ii8+PHBhdGggZD0iTTIyIDIxdi0yYTQgNCAwIDAgMC0zLTMuODciLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PC9zdmc+"> <b>{format_number(user.following)}</b> Following</span>
                 {f'<span class="meta-item">{company}</span>' if company else ''}
                 {f'<span class="meta-item">{location}</span>' if location else ''}
                 {f'<span class="meta-item">{blog}</span>' if blog else ''}
@@ -57,7 +61,7 @@ def render_dashboard(username: str):
     with m_col1:
         st.markdown(f'<div class="metric-box"><div class="metric-value">{stats.total_repos}</div><div class="metric-label">Public Repositories</div></div>', unsafe_allow_html=True)
     with m_col2:
-        st.markdown(f'<div class="metric-box"><div class="metric-value">★ {format_number(stats.total_stars)}</div><div class="metric-label">Total Stars</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="metric-value"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZTNiMzQxIiBzdHJva2U9IiNlM2IzNDEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWdvbiBwb2ludHM9IjEyIDIgMTUuMDkgOC4yNiAyMiA5LjI3IDE3IDE0LjE0IDE4LjE4IDIxLjAyIDEyIDE3Ljc3IDUuODIgMjEuMDIgNyAxNC4xNCAyIDkuMjcgOC45MSA4LjI2IDEyIDIiLz48L3N2Zz4="> {format_number(stats.total_stars)}</div><div class="metric-label">Total Stars</div></div>', unsafe_allow_html=True)
     with m_col3:
         st.markdown(f'<div class="metric-box"><div class="metric-value">⑂ {format_number(stats.total_forks)}</div><div class="metric-label">Total Forks</div></div>', unsafe_allow_html=True)
     with m_col4:
@@ -68,7 +72,7 @@ def render_dashboard(username: str):
     # ==========================================
     # 3. Language Distribution Chart
     # ==========================================
-    st.subheader("📊 Programming Language Breakdown")
+    st.subheader(" Programming Language Breakdown")
     if metrics.language_breakdown:
         df_langs = pd.DataFrame([
             {"Language": l.language, "Repositories": l.count, "Percentage": l.percentage, "Color": l.color}
@@ -98,7 +102,7 @@ def render_dashboard(username: str):
     # ==========================================
     # 4. Top Repositories Grid
     # ==========================================
-    st.subheader("🏆 Top Starred Repositories")
+    st.subheader(" Top Starred Repositories")
     if stats.top_repos:
         repo_cols = st.columns(3)
         for idx, repo in enumerate(stats.top_repos):
@@ -112,13 +116,13 @@ def render_dashboard(username: str):
                     <div class="repo-card" style="margin-bottom:1rem;">
                         <div>
                             <div class="repo-title">
-                                <a href="https://github.com/{repo.full_name}" target="_blank" style="color:#58a6ff; text-decoration:none;">📁 {repo.name}</a>
+                                <a href="https://github.com/{repo.full_name}" target="_blank" style="color:#58a6ff; text-decoration:none;"> {repo.name}</a>
                             </div>
                             <div class="repo-desc">{desc_short}</div>
                         </div>
                         <div class="repo-stats">
                             <span><span class="lang-dot" style="background:{lang_color};"></span> {repo.language or 'Unknown'}</span>
-                            <span>★ {format_number(repo.stargazers_count)}</span>
+                            <span> {format_number(repo.stargazers_count)}</span>
                             <span>⑂ {format_number(repo.forks_count)}</span>
                         </div>
                     </div>
@@ -128,15 +132,15 @@ def render_dashboard(username: str):
                 
                 # Button to set repository as conversation focus
                 is_selected = session_service.selected_repository == repo.name
-                btn_label = "⚡ Active Focus" if is_selected else f"🔍 Focus in Chat"
+                btn_label = " Active Focus" if is_selected else f" Focus in Chat"
                 btn_type = "primary" if is_selected else "secondary"
                 if st.button(btn_label, key=f"focus_btn_{repo.id}", type=btn_type, use_container_width=True):
                     if is_selected:
                         session_service.set_repository(None)
-                        st.toast(f"Removed focus from {repo.name}", icon="ℹ️")
+                        st.toast(f"Removed focus from {repo.name}")
                     else:
                         session_service.set_repository(repo.name)
-                        st.toast(f"Locked conversation focus to repo: {repo.name}", icon="🎯")
+                        st.toast(f"Locked conversation focus to repo: {repo.name}")
                     st.rerun()
     else:
         st.info("No public repositories found for this account.")
@@ -146,7 +150,7 @@ def render_dashboard(username: str):
     # ==========================================
     col_exp1, col_exp2 = st.columns(2)
     with col_exp1:
-        with st.expander("🏢 Affiliated Organizations", expanded=False):
+        with st.expander(" Affiliated Organizations", expanded=False):
             if metrics.orgs:
                 for org in metrics.orgs:
                     st.markdown(f"**[{org.login}](https://github.com/{org.login})** — *{org.description or 'No description'}*")
@@ -154,7 +158,7 @@ def render_dashboard(username: str):
                 st.write("No public organization memberships found.")
                 
     with col_exp2:
-        with st.expander("⚡ Recent Public Activity", expanded=False):
+        with st.expander(" Recent Public Activity", expanded=False):
             if metrics.recent_activity:
                 for act in metrics.recent_activity[:6]:
                     repo_name = act.repo.get("name", "unknown")
