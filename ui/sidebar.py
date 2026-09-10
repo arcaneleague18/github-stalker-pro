@@ -80,13 +80,4 @@ def render_sidebar():
                     else:
                         st.warning("Please enter a valid GitHub username.")
 
-        st.markdown("---")
-        st.markdown(
-            """
-            <div style="font-size:0.75rem; color:#8b949e; line-height:1.4;">
-                <b>Model Context Protocol (MCP)</b><br/>
-                No RAG • No Vector DBs • Dynamic AI Tool Calling directly from GitHub API.
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+

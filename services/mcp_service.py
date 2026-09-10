@@ -184,6 +184,30 @@ STANDARD_GITHUB_MCP_TOOLS = [
             },
             "required": ["username"]
         }
+    ),
+    MCPToolDefinition(
+        name="list_user_followers",
+        description="List the usernames of people who follow a specific GitHub user.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "username": {"type": "string", "description": "The GitHub username."},
+                "per_page": {"type": "integer", "description": "Number of followers to return (max 100).", "default": 30}
+            },
+            "required": ["username"]
+        }
+    ),
+    MCPToolDefinition(
+        name="list_user_following",
+        description="List the usernames of people a specific GitHub user is following.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "username": {"type": "string", "description": "The GitHub username."},
+                "per_page": {"type": "integer", "description": "Number of followed users to return (max 100).", "default": 30}
+            },
+            "required": ["username"]
+        }
     )
 ]
 
@@ -361,7 +385,7 @@ class MCPClient:
         logger.info(f"MCP Call: {tool_name} with args: {arguments}")
 
         # 1. Intercept custom tools that stdio does not support natively
-        if tool_name == "get_user_contributions":
+        if tool_name in ("get_user_contributions", "list_user_followers", "list_user_following"):
             return self._execute_rest_adapter(tool_name, arguments)
 
         # 2. Try stdio if connected and process active
@@ -580,6 +604,34 @@ class MCPClient:
                     } for e in events
                 ]
                 return json.dumps(summary, indent=2)
+
+            elif tool_name == "list_user_followers":
+                per_page = args.get("per_page", 30)
+                url = f"{base_url}/users/{args['username']}/followers?per_page={per_page}"
+                res = requests.get(url, headers=headers, timeout=10)
+                res.raise_for_status()
+                followers = [
+                    {
+                        "username": u.get("login"),
+                        "profile_url": u.get("html_url"),
+                        "avatar_url": u.get("avatar_url")
+                    } for u in res.json()
+                ]
+                return json.dumps(followers, indent=2)
+
+            elif tool_name == "list_user_following":
+                per_page = args.get("per_page", 30)
+                url = f"{base_url}/users/{args['username']}/following?per_page={per_page}"
+                res = requests.get(url, headers=headers, timeout=10)
+                res.raise_for_status()
+                following = [
+                    {
+                        "username": u.get("login"),
+                        "profile_url": u.get("html_url"),
+                        "avatar_url": u.get("avatar_url")
+                    } for u in res.json()
+                ]
+                return json.dumps(following, indent=2)
 
             else:
                 return f"Error: Tool '{tool_name}' is not recognized by the MCP server."

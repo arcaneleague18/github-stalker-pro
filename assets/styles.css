@@ -300,7 +300,33 @@ button[kind="secondary"]:hover {
     color: #ffffff !important;
 }
 
-/* Chat Input Styling */
+/* ==========================================
+   Chat Layout & Input Styling
+   ========================================== */
+
+/* Add bottom padding so chat messages aren't hidden behind the fixed input */
+.main .block-container {
+    padding-bottom: 6rem !important;
+}
+
+/* Pin chat input to the absolute bottom of the viewport, offset for sidebar */
+div[data-testid="stChatInput"] {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 21rem !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background-color: #0d1117 !important;
+    padding: 0.75rem 2rem 1.25rem 2rem !important;
+    border-top: 1px solid #30363d !important;
+    transition: left 0.3s ease !important;
+}
+
+/* When sidebar is collapsed, expand input to full width */
+:has([data-testid="stSidebar"][aria-expanded="false"]) div[data-testid="stChatInput"] {
+    left: 0 !important;
+}
+
 .stChatInput>div {
     background-color: #161b22 !important;
     border: 1px solid #30363d !important;
@@ -347,4 +373,15 @@ code {
 
 .status-pulse {
     animation: pulse 2s infinite ease-in-out;
+}
+
+/* Remove sidebar scrolling */
+[data-testid="stSidebar"] > div:first-child,
+[data-testid="stSidebarNav"] {
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none; /* Firefox */
+}
+[data-testid="stSidebar"] ::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
 }
