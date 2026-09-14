@@ -55,8 +55,8 @@ GitHub Service <-----------------------> GitHub MCP Server
 
 ### 1. Clone & Navigate
 ```bash
-git clone https://github.com/your-username/github-insight-ai.git
-cd github-insight-ai
+git clone https://github.com/your-username/github-stalker-pro.git
+cd github-stalker-pro
 ```
 
 ### 2. Install Dependencies
@@ -110,9 +110,12 @@ The application communicates with the GitHub MCP server in two ways:
 - `list_user_repositories` / `search_repositories`: Discover public repositories.
 - `get_repository`: Inspect repository metadata and branch details.
 - `get_file_contents`: Read file contents, source code, and READMEs.
-- `get_repository_tree`: Explore directory and file structures.
+- `get_repository_tree`: Explore directory and file structures (with automatic branch fallback).
 - `list_commits`: Check recent commit history.
 - `list_branches` / `list_pull_requests` / `list_issues`: Review repository activity.
+- `search_issues`: Search issues and pull requests across GitHub with advanced queries.
+- `get_user_contributions`: Calculate total commits, issues, and PR contributions for timeframes.
+- `list_user_followers` / `list_user_following`: Inspect social connections.
 - `list_releases` / `list_tags` / `list_user_organizations`: Access extended metadata.
 
 ---
@@ -120,7 +123,7 @@ The application communicates with the GitHub MCP server in two ways:
 ## 📂 Project Structure
 
 ```text
-github-insight-ai/
+github-stalker-pro/
 │
 ├── app.py                   # Streamlit main application entry point
 ├── config.py                # Environment management & Pydantic settings

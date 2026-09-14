@@ -32,9 +32,11 @@ def format_number(num: int | float | None) -> str:
     try:
         n = float(num)
         if n >= 1_000_000:
-            return f"{n / 1_000_000:.1f}M".rstrip("0").rstrip(".") + "M"
+            val = f"{n / 1_000_000:.1f}".rstrip("0").rstrip(".")
+            return f"{val}M"
         if n >= 1_000:
-            return f"{n / 1_000:.1f}k"
+            val = f"{n / 1_000:.1f}".rstrip("0").rstrip(".")
+            return f"{val}k"
         return str(int(n))
     except (ValueError, TypeError):
         return "0"

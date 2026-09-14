@@ -35,9 +35,16 @@ def test_models():
 
 def test_helpers():
     logger.info("Testing utility helper functions...")
+    assert format_number(None) == "0"
+    assert format_number(0) == "0"
+    assert format_number(950) == "950"
+    assert format_number(1000) == "1k"
     assert format_number(12500) == "12.5k"
     assert format_number(1500000) == "1.5M"
+    assert format_number(2000000) == "2M"
+    assert format_number(10000000) == "10M"
     assert get_language_color("Python") == "#3572A5"
+    assert get_language_color("TypeScript") == "#3178c6"
     logger.info(" Helper utilities validated successfully")
 
 def test_mcp_tools():
@@ -50,6 +57,13 @@ def test_mcp_tools():
     openai_tool = tool.to_openai_tool()
     assert openai_tool["type"] == "function"
     assert openai_tool["function"]["name"] == "test_tool"
+
+    from services.mcp_service import mcp_client, FALLBACK_TOOLS
+    assert "search_issues" in mcp_client.tools
+    search_tool = mcp_client.tools["search_issues"].to_openai_tool()
+    assert search_tool["type"] == "function"
+    assert "query" in search_tool["function"]["parameters"]["properties"]
+    assert len(FALLBACK_TOOLS) >= 4
     logger.info(" MCP tool conversion to OpenAI function schema validated successfully")
 
 def test_services():
@@ -58,6 +72,12 @@ def test_services():
     assert mcp_client is not None
     assert github_service is not None
     assert openai_service is not None
+    assert len(mcp_client.tools) >= 17
+
+    connected, status_label = openai_service.check_connection()
+    assert isinstance(connected, bool)
+    assert status_label in ("Connected", "Offline")
+    logger.info(f" LLM Connection status checked: {status_label} (connected={connected})")
     logger.info(f" Services initialized. Available MCP tools count: {len(mcp_client.tools)}")
 
 def main():

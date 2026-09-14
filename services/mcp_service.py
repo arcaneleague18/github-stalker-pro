@@ -208,7 +208,27 @@ STANDARD_GITHUB_MCP_TOOLS = [
             },
             "required": ["username"]
         }
+    ),
+    MCPToolDefinition(
+        name="search_issues",
+        description="Search issues and pull requests across GitHub repositories using query syntax (e.g., 'author:USERNAME type:issue' or 'author:USERNAME type:pr').",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "The search query (e.g., 'author:torvalds type:pr' or 'repo:owner/repo is:open')."},
+                "sort": {"type": "string", "description": "Sort field (comments, reactions, created, updated).", "default": "created"},
+                "order": {"type": "string", "description": "Sort order (asc or desc).", "default": "desc"},
+                "per_page": {"type": "integer", "description": "Number of results to return (max 100).", "default": 15}
+            },
+            "required": ["query"]
+        }
     )
+]
+
+# Custom tools that fallback to HTTP REST adapter or extend standard stdio functionality
+FALLBACK_TOOLS = [
+    t for t in STANDARD_GITHUB_MCP_TOOLS
+    if t.name in ("get_user_contributions", "list_user_followers", "list_user_following", "search_issues")
 ]
 
 class MCPClient:
@@ -282,7 +302,7 @@ class MCPClient:
                 "params": {
                     "protocolVersion": "2024-11-05",
                     "capabilities": {"roots": {"listChanged": False}, "sampling": {}},
-                    "clientInfo": {"name": "github-insight-ai", "version": "1.0.0"}
+                    "clientInfo": {"name": "github-stalker-pro", "version": "1.0.0"}
                 }
             }
             self._send_stdio(init_req)
@@ -385,7 +405,7 @@ class MCPClient:
         logger.info(f"MCP Call: {tool_name} with args: {arguments}")
 
         # 1. Intercept custom tools that stdio does not support natively
-        if tool_name in ("get_user_contributions", "list_user_followers", "list_user_following"):
+        if tool_name in ("get_user_contributions", "list_user_followers", "list_user_following", "search_issues"):
             return self._execute_rest_adapter(tool_name, arguments)
 
         # 2. Try stdio if connected and process active
@@ -509,6 +529,12 @@ class MCPClient:
                 recursive = "1" if args.get("recursive", True) else "0"
                 url = f"{base_url}/repos/{args['owner']}/{args['repo']}/git/trees/{tree_sha}?recursive={recursive}"
                 res = requests.get(url, headers=headers, timeout=10)
+                # If default main branch returns 404, fallback to master
+                if res.status_code == 404 and tree_sha == "main":
+                    fallback_url = f"{base_url}/repos/{args['owner']}/{args['repo']}/git/trees/master?recursive={recursive}"
+                    fallback_res = requests.get(fallback_url, headers=headers, timeout=10)
+                    if fallback_res.status_code == 200:
+                        res = fallback_res
                 res.raise_for_status()
                 tree_data = res.json().get("tree", [])
                 paths = [f"{t['type'][:4]} | {t['path']}" for t in tree_data[:100]]
@@ -632,6 +658,33 @@ class MCPClient:
                     } for u in res.json()
                 ]
                 return json.dumps(following, indent=2)
+
+            elif tool_name == "search_issues":
+                query = args.get("query", "")
+                sort = args.get("sort", "created")
+                order = args.get("order", "desc")
+                per_page = args.get("per_page", 15)
+                url = f"{base_url}/search/issues?q={query}&sort={sort}&order={order}&per_page={per_page}"
+                res = requests.get(url, headers=headers, timeout=10)
+                res.raise_for_status()
+                data = res.json()
+                items = data.get("items", [])
+                summary = [
+                    {
+                        "number": item.get("number"),
+                        "title": item.get("title"),
+                        "state": item.get("state"),
+                        "url": item.get("html_url"),
+                        "author": item.get("user", {}).get("login"),
+                        "created_at": item.get("created_at"),
+                        "comments": item.get("comments", 0),
+                        "is_pr": "pull_request" in item
+                    } for item in items
+                ]
+                return json.dumps({
+                    "total_count": data.get("total_count", 0),
+                    "items": summary
+                }, indent=2)
 
             else:
                 return f"Error: Tool '{tool_name}' is not recognized by the MCP server."

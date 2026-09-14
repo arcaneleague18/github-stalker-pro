@@ -12,6 +12,8 @@ class OpenAIService:
 
     def __init__(self):
         self._client: Optional[openai.OpenAI] = None
+        self._last_check_time: float = 0
+        self._last_status: tuple[bool, str] = (False, "Offline")
 
     def get_client(self) -> openai.OpenAI:
         """Initialize and return the OpenAI-compatible client pointing to the local model proxy."""
@@ -24,6 +26,24 @@ class OpenAIService:
                 base_url=base_url
             )
         return self._client
+
+    def check_connection(self) -> tuple[bool, str]:
+        """Check if the LLM API / proxy is reachable with cached result."""
+        import time
+        now = time.time()
+        if now - self._last_check_time < 8.0:
+            return self._last_status
+
+        try:
+            client = self.get_client()
+            client.models.list(timeout=2.0)
+            self._last_status = (True, "Connected")
+        except Exception as e:
+            logger.debug(f"LLM connection check failed: {e}")
+            self._last_status = (False, "Offline")
+
+        self._last_check_time = now
+        return self._last_status
 
     def stream_chat_with_tools(
         self,

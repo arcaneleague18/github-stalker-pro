@@ -1,10 +1,74 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from datetime import datetime
 from services import github_service, session_service
 from utils import format_number, format_timestamp, get_logger, get_language_color
 
 logger = get_logger(__name__)
+
+def generate_markdown_report(metrics) -> str:
+    """Generate a clean, structured Markdown intelligence report for the user."""
+    user = metrics.user
+    stats = metrics.stats
+    
+    report_lines = [
+        f"# 🤖 GitHub Intelligence Report: @{user.login}",
+        f"*Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} via Github Stalker Pro*",
+        "",
+        "## 👤 Profile Overview",
+        f"- **Name**: {user.display_name}",
+        f"- **Username**: [@{user.login}](https://github.com/{user.login})",
+        f"- **Bio**: {user.bio or 'N/A'}",
+        f"- **Company**: {user.company or 'N/A'}",
+        f"- **Location**: {user.location or 'N/A'}",
+        f"- **Website/Blog**: {user.blog or 'N/A'}",
+        f"- **Followers**: {user.followers:,}",
+        f"- **Following**: {user.following:,}",
+        "",
+        "## 📊 Repository & Code Statistics",
+        f"- **Public Repositories**: {stats.total_repos}",
+        f"- **Total Stars Earned**: {stats.total_stars:,}",
+        f"- **Total Forks**: {stats.total_forks:,}",
+        f"- **Affiliated Organizations**: {len(metrics.orgs)}",
+        "",
+        "## 💻 Language Distribution",
+        "| Language | Repositories | Percentage |",
+        "| :--- | :--- | :--- |",
+    ]
+    for lang in metrics.language_breakdown:
+        report_lines.append(f"| {lang.language} | {lang.count} | {lang.percentage}% |")
+    
+    report_lines.extend([
+        "",
+        "## 🌟 Top Starred Repositories",
+    ])
+    for repo in stats.top_repos:
+        desc = repo.description or "No description provided."
+        lang = repo.language or "Unknown"
+        report_lines.append(
+            f"- **[{repo.name}]({repo.html_url or f'https://github.com/{repo.full_name}'})** ({lang}) — "
+            f"★ {repo.stargazers_count:,} | ⑂ {repo.forks_count:,}\n  *{desc}*"
+        )
+
+    if metrics.orgs:
+        report_lines.extend(["", "## 🏢 Affiliated Organizations"])
+        for org in metrics.orgs:
+            report_lines.append(f"- **[{org.login}](https://github.com/{org.login})**: {org.description or 'No description'}")
+
+    if metrics.recent_activity:
+        report_lines.extend(["", "## ⚡ Recent Activity"])
+        for act in metrics.recent_activity[:10]:
+            repo_name = act.repo.get("name", "repository")
+            ts = format_timestamp(act.created_at)
+            report_lines.append(f"- **{act.type.replace('Event', '')}** on `{repo_name}` ({ts})")
+
+    report_lines.extend([
+        "",
+        "---",
+        "*Report compiled by Github Stalker Pro using Model Context Protocol (MCP)*"
+    ])
+    return "\n".join(report_lines)
 
 def render_dashboard(username: str):
     """Render comprehensive analytics dashboard for the selected GitHub account."""
@@ -49,6 +113,16 @@ def render_dashboard(username: str):
         f'</div>'
     )
     st.markdown(profile_html, unsafe_allow_html=True)
+
+    # Export Report Action
+    report_md = generate_markdown_report(metrics)
+    st.download_button(
+        label="📥 Download Intelligence Report (.md)",
+        data=report_md,
+        file_name=f"{user.login}_github_intelligence_report.md",
+        mime="text/markdown",
+        use_container_width=True
+    )
 
     st.markdown("---")
 

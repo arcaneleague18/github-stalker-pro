@@ -1,5 +1,5 @@
 import streamlit as st
-from services import session_service, mcp_client, github_service
+from services import session_service, mcp_client, github_service, openai_service
 from utils import get_logger
 
 logger = get_logger(__name__)
@@ -9,22 +9,30 @@ def render_sidebar():
     with st.sidebar:
         st.markdown(
             """
-            <div style="text-align:center; padding-bottom:1rem; border-bottom:1px solid #30363d; margin-bottom:1.5rem;">
-                <h2 style="color:#58a6ff; margin:0; font-weight:700;">🤖 GitHub Insight</h2>
+            <div style="text-align:center; padding-bottom:1rem; border-bottom:1px solid #30363d; margin-bottom:1.25rem;">
+                <h2 style="color:#58a6ff; margin:0; font-weight:700;">🤖 GitHub Stalker Pro</h2>
                 <p style="color:#8b949e; font-size:0.85rem; margin-top:0.2rem;">AI-Powered MCP Analytics</p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        # MCP Status Indicator
-        status_color = "#238636" if mcp_client.connected else "#da3633"
-        status_text = "Connected (MCP)" if mcp_client.connected else "Offline"
+        # Connection Status Indicators (MCP Server & LLM/AI Assistant)
+        mcp_color = "#238636" if mcp_client.connected else "#da3633"
+        mcp_text = "Connected (MCP)" if mcp_client.connected else "Offline"
+
+        llm_connected, llm_status_text = openai_service.check_connection()
+        llm_color = "#238636" if llm_connected else "#da3633"
+
         st.markdown(
             f"""
-            <div style="background:#161b22; padding:0.6rem 1rem; border-radius:8px; border:1px solid #30363d; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between;">
+            <div style="background:#161b22; padding:0.55rem 0.9rem; border-radius:8px; border:1px solid #30363d; margin-bottom:0.5rem; display:flex; align-items:center; justify-content:space-between;">
                 <span style="font-size:0.85rem; color:#c9d1d9;">MCP Server:</span>
-                <span style="color:{status_color}; font-weight:600; font-size:0.85rem;">● {status_text}</span>
+                <span style="color:{mcp_color}; font-weight:600; font-size:0.85rem;">● {mcp_text}</span>
+            </div>
+            <div style="background:#161b22; padding:0.55rem 0.9rem; border-radius:8px; border:1px solid #30363d; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:0.85rem; color:#c9d1d9;">AI Assistant:</span>
+                <span style="color:{llm_color}; font-weight:600; font-size:0.85rem;">● {llm_status_text}</span>
             </div>
             """,
             unsafe_allow_html=True

@@ -301,6 +301,40 @@ button[kind="secondary"]:hover {
 }
 
 /* ==========================================
+   Input Styling & Form Instructions Fix
+   ========================================== */
+/* Completely remove clumsy "Press Enter to submit form" / "Press Enter to apply" instruction overlays */
+[data-testid="InputInstructions"],
+div[data-testid="InputInstructions"],
+span[data-testid="InputInstructions"],
+small[data-testid="InputInstructions"],
+.stTextInput [data-testid="InputInstructions"],
+.stTextInput div[data-testid="InputInstructions"],
+div:has(> [data-testid="InputInstructions"]) > [data-testid="InputInstructions"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    pointer-events: none !important;
+}
+
+/* Ensure clean styling for text inputs */
+.stTextInput div[data-baseweb="input"] {
+    background-color: #161b22 !important;
+    border-color: #30363d !important;
+    border-radius: 8px !important;
+}
+
+.stTextInput div[data-baseweb="input"]:focus-within {
+    border-color: #58a6ff !important;
+    box-shadow: 0 0 0 1px #58a6ff !important;
+}
+
+/* ==========================================
    Chat Layout & Input Styling
    ========================================== */
 
