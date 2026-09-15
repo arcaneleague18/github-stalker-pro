@@ -215,7 +215,7 @@ STANDARD_GITHUB_MCP_TOOLS = [
         inputSchema={
             "type": "object",
             "properties": {
-                "query": {"type": "string", "description": "The search query (e.g., 'author:torvalds type:pr' or 'repo:owner/repo is:open')."},
+                "query": {"type": "string", "description": "The search query (e.g., 'author:username type:pr' or 'repo:owner/repo is:open')."},
                 "sort": {"type": "string", "description": "Sort field (comments, reactions, created, updated).", "default": "created"},
                 "order": {"type": "string", "description": "Sort order (asc or desc).", "default": "desc"},
                 "per_page": {"type": "integer", "description": "Number of results to return (max 100).", "default": 15}

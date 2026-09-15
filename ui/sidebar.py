@@ -4,20 +4,20 @@ from utils import get_logger
 
 logger = get_logger(__name__)
 
-def render_sidebar():
+def render_sidebar(is_comparison: bool = False):
     """Render sidebar navigation, user input, and session controls."""
     with st.sidebar:
         st.markdown(
             """
-            <div style="text-align:center; padding-bottom:1rem; border-bottom:1px solid #30363d; margin-bottom:1.25rem;">
-                <h2 style="color:#58a6ff; margin:0; font-weight:700;">🤖 GitHub Stalker Pro</h2>
-                <p style="color:#8b949e; font-size:0.85rem; margin-top:0.2rem;">AI-Powered MCP Analytics</p>
+            <div style="text-align:center; padding-bottom:0.4rem; border-bottom:1px solid #30363d; margin-bottom:0.8rem;">
+                <h2 style="color:#58a6ff; margin:0; font-size:1.25rem; font-weight:700;">🤖 GitHub Stalker Pro</h2>
+                <p style="color:#8b949e; font-size:0.75rem; margin-top:0.1rem; margin-bottom:0;">AI-Powered MCP Analytics</p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        # Connection Status Indicators (MCP Server & LLM/AI Assistant)
+        # Connection Status Indicators (Unified Compact Card)
         mcp_color = "#238636" if mcp_client.connected else "#da3633"
         mcp_text = "Connected (MCP)" if mcp_client.connected else "Offline"
 
@@ -26,19 +26,36 @@ def render_sidebar():
 
         st.markdown(
             f"""
-            <div style="background:#161b22; padding:0.55rem 0.9rem; border-radius:8px; border:1px solid #30363d; margin-bottom:0.5rem; display:flex; align-items:center; justify-content:space-between;">
-                <span style="font-size:0.85rem; color:#c9d1d9;">MCP Server:</span>
-                <span style="color:{mcp_color}; font-weight:600; font-size:0.85rem;">● {mcp_text}</span>
-            </div>
-            <div style="background:#161b22; padding:0.55rem 0.9rem; border-radius:8px; border:1px solid #30363d; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between;">
-                <span style="font-size:0.85rem; color:#c9d1d9;">AI Assistant:</span>
-                <span style="color:{llm_color}; font-weight:600; font-size:0.85rem;">● {llm_status_text}</span>
+            <div style="background:#161b22; padding:0.45rem 0.8rem; border-radius:8px; border:1px solid #30363d; margin-bottom:0.8rem; display:flex; flex-direction:column; gap:0.25rem;">
+                <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
+                    <span style="color:#c9d1d9;">MCP Server:</span>
+                    <span style="color:{mcp_color}; font-weight:600;">● {mcp_text}</span>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem; border-top:1px solid #21262d; padding-top:0.25rem;">
+                    <span style="color:#c9d1d9;">AI Assistant:</span>
+                    <span style="color:{llm_color}; font-weight:600;">● {llm_status_text}</span>
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        st.subheader(" Account Target")
+        if is_comparison:
+            st.markdown(
+                """
+                <div style="background:rgba(247, 120, 186, 0.1); border:1px solid rgba(247, 120, 186, 0.3); padding:0.8rem; border-radius:10px; margin-bottom:0.8rem; text-align:center;">
+                    <span style="font-size:0.75rem; color:#f778ba; font-weight:600; display:block; text-transform:uppercase; letter-spacing:0.5px;">⚔️ Mode Active</span>
+                    <strong style="color:#ffffff; font-size:1rem;">Developer Comparison</strong>
+                    <p style="color:#8b949e; font-size:0.75rem; margin:0.3rem 0 0 0; line-height:1.3;">
+                        Compare two developers side-by-side using the form on the page.
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            return
+
+        st.markdown("<p style='font-size:0.85rem; text-transform:uppercase; color:#8b949e; letter-spacing:0.5px; font-weight:600; margin-bottom:0.4rem;'>🎯 Account Target</p>", unsafe_allow_html=True)
 
         current_user = session_service.current_username
 
@@ -75,10 +92,11 @@ def render_sidebar():
             with st.form(key="username_form", clear_on_submit=False):
                 username_input = st.text_input(
                     label="GitHub Username",
-                    placeholder="e.g. torvalds, octocat, gaearon",
+                    label_visibility="collapsed",
+                    placeholder="Enter GitHub username...",
                     help="Enter any public GitHub account username to analyze."
                 )
-                analyze_clicked = st.form_submit_button(" Analyze Account", use_container_width=True)
+                analyze_clicked = st.form_submit_button("🚀 Analyze Account", use_container_width=True)
 
                 if analyze_clicked:
                     if username_input and username_input.strip():

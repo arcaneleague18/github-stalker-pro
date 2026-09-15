@@ -80,6 +80,28 @@ def test_services():
     logger.info(f" LLM Connection status checked: {status_label} (connected={connected})")
     logger.info(f" Services initialized. Available MCP tools count: {len(mcp_client.tools)}")
 
+def test_comparison():
+    logger.info("Testing comparison module and markdown dossier generator...")
+    from ui import render_comparison_page
+    from ui.comparison import generate_comparison_markdown
+    from models import GitHubUser, RepoStats, DashboardMetrics
+    assert callable(render_comparison_page)
+
+    u1 = GitHubUser.model_validate({"login": "dev1", "name": "Developer One", "followers": 100})
+    u2 = GitHubUser.model_validate({"login": "dev2", "name": "Developer Two", "followers": 200})
+    s1 = RepoStats(total_repos=5, total_stars=1000, total_forks=100)
+    s2 = RepoStats(total_repos=10, total_stars=500, total_forks=200)
+
+    m1 = DashboardMetrics(user=u1, stats=s1, repos=[], orgs=[], language_breakdown=[], recent_activity=[])
+    m2 = DashboardMetrics(user=u2, stats=s2, repos=[], orgs=[], language_breakdown=[], recent_activity=[])
+
+    dossier = generate_comparison_markdown(m1, m2, ai_analysis="Analysis test")
+    assert "@dev1" in dossier
+    assert "@dev2" in dossier
+    assert "Analysis test" in dossier
+    assert "Head-to-Head Statistics" in dossier
+    logger.info(" Comparison module and dossier generator validated successfully")
+
 def main():
     logger.info("=== Starting Github Stalker pro Verification Tests ===")
     try:
@@ -87,6 +109,7 @@ def main():
         test_helpers()
         test_mcp_tools()
         test_services()
+        test_comparison()
         logger.info("===  ALL VERIFICATION TESTS PASSED SUCCESSFULLY! ===")
     except Exception as e:
         logger.error(f" Test verification failed: {e}")

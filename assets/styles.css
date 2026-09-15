@@ -409,13 +409,121 @@ code {
     animation: pulse 2s infinite ease-in-out;
 }
 
-/* Remove sidebar scrolling */
-[data-testid="stSidebar"] > div:first-child,
-[data-testid="stSidebarNav"] {
-    overflow-y: hidden !important;
+/* Enable smooth sidebar scrolling so elements are never cut off */
+[data-testid="stSidebar"] > div:first-child {
+    overflow-y: auto !important;
     overflow-x: hidden !important;
-    scrollbar-width: none; /* Firefox */
+    max-height: 100vh !important;
 }
+
+[data-testid="stSidebarNav"] {
+    overflow: visible !important;
+}
+
 [data-testid="stSidebar"] ::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
+    width: 6px !important;
+    display: block !important;
 }
+
+[data-testid="stSidebar"] ::-webkit-scrollbar-track {
+    background: #0d1117 !important;
+}
+
+[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {
+    background: #30363d !important;
+    border-radius: 3px !important;
+}
+
+[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover {
+    background: #58a6ff !important;
+}
+
+/* ==========================================
+   Developer Comparison Styling
+   ========================================== */
+.vs-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #58a6ff 0%, #f778ba 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1rem;
+    box-shadow: 0 0 15px rgba(247, 120, 186, 0.4);
+    letter-spacing: 1px;
+    animation: pulse 2.5s infinite ease-in-out;
+}
+
+/* Streamlit Native Navigation Styling */
+[data-testid="stSidebarNav"] {
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+[data-testid="stSidebarNav"] ul {
+    gap: 0.3rem !important;
+}
+
+[data-testid="stSidebarNav"] li a {
+    border-radius: 8px !important;
+    padding: 0.5rem 0.8rem !important;
+    color: #c9d1d9 !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid transparent !important;
+}
+
+[data-testid="stSidebarNav"] li a:hover {
+    background: rgba(88, 166, 255, 0.1) !important;
+    color: #58a6ff !important;
+    border-color: rgba(88, 166, 255, 0.3) !important;
+}
+
+[data-testid="stSidebarNav"] li a[aria-current="page"] {
+    background: rgba(88, 166, 255, 0.15) !important;
+    color: #58a6ff !important;
+    border-color: #58a6ff !important;
+    font-weight: 600 !important;
+}
+
+/* ==========================================
+   Sidebar Scrolling & Responsive Fit
+   ========================================== */
+section[data-testid="stSidebar"] {
+    overflow-y: auto !important;
+}
+
+[data-testid="stSidebarUserContent"] {
+    padding-top: 0.5rem !important;
+    padding-bottom: 2rem !important;
+    overflow-y: visible !important;
+}
+
+/* Ensure the entire sidebar container can scroll on short viewports */
+[data-testid="stSidebar"] > div:first-child {
+    overflow-y: auto !important;
+    max-height: 100vh !important;
+}
+
+/* Slim modern scrollbar for sidebar */
+section[data-testid="stSidebar"]::-webkit-scrollbar,
+[data-testid="stSidebarUserContent"]::-webkit-scrollbar,
+[data-testid="stSidebar"] > div:first-child::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+section[data-testid="stSidebar"]::-webkit-scrollbar-thumb,
+[data-testid="stSidebarUserContent"]::-webkit-scrollbar-thumb,
+[data-testid="stSidebar"] > div:first-child::-webkit-scrollbar-thumb {
+    background: #30363d !important;
+    border-radius: 4px !important;
+}
+
+section[data-testid="stSidebar"]::-webkit-scrollbar-thumb:hover,
+[data-testid="stSidebarUserContent"]::-webkit-scrollbar-thumb:hover,
+[data-testid="stSidebar"] > div:first-child::-webkit-scrollbar-thumb:hover {
+    background: #58a6ff !important;
+}
+

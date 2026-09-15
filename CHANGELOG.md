@@ -1,16 +1,36 @@
 # Changelog
 
-All notable changes to the **GitHub Stalker Pro** project will be documented in this file.
+All notable changes to the **GitHub Stalker Pro** project are documented here chronologically by date.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## 2026-09-15
+
+### Added
+- **Developer Comparison Showdown (Separate Page)**:
+  - Implemented Streamlit 1.36+ `st.navigation` multi-page routing with **👤 Account Inspector** and **⚔️ Compare Developers** tabs.
+  - Added dedicated comparison interface in `ui/comparison.py` allowing any two GitHub developers to be compared side-by-side.
+  - Side-by-side developer profile dossiers displaying avatars, bios, companies, locations, and follower/following metrics.
+  - Head-to-Head scorecard with automatic `🏆 Leader` badges comparing stars, forks, public repositories, and follower counts.
+  - Grouped Altair multi-language comparative bar chart displaying programming language breakdown for both developers.
+  - Top 3 starred repository showdown showcasing primary projects, stars, forks, and language badges.
+  - **AI Architectural Comparison**: Streams an LLM architectural breakdown analyzing engineering paradigms, core technology stacks, design philosophies, and open-source impact.
+  - **Download Comparative Dossier (.md)**: One-click export downloading a formatted Markdown comparison document.
+  - Added automated test coverage in `test_app.py` for comparison generator and module validation.
+- **Direct Hero Search on Welcome Screen**:
+  - Added a centered username search form directly on the main welcome screen so accounts can be analyzed immediately without having to use the sidebar.
+
+### Changed & Fixed
+- **Removed All Sample Usernames & Presets**:
+  - Cleaned all hardcoded sample usernames, popular showdown preset chips, quick picks, and sample names from placeholders across the entire application and service layers.
+- **Sidebar Usability & Scrolling Fix**:
+  - Enabled smooth vertical scrolling (`overflow-y: auto !important`) on the sidebar container for smaller laptop viewports.
+  - Compacted sidebar header, combined MCP and AI Assistant indicators into a unified status card, and collapsed input labels so the account input field stays comfortably in view.
 
 ---
 
-## [Unreleased]
+## 2026-09-14
 
 ### Added
-- **AI Assistant Status Indicator**: Added live LLM connection monitor to the sidebar alongside the MCP Server indicator, showing real-time connectivity (`● Connected` / `● Offline`).
+- **AI Assistant Status Indicator**: Added a live LLM connection monitor to the sidebar alongside the MCP Server indicator, showing real-time connectivity (`● Connected` / `● Offline`).
 - **`search_issues` MCP Tool**: Added new MCP tool schema and GitHub Search REST handler to query issues and pull requests globally (`author:USERNAME type:issue`) without looping over repositories.
 - **Export Intelligence Report**: Added one-click **"Download Intelligence Report (.md)"** button in the dashboard to generate and download a comprehensive Markdown report of the analyzed developer.
 - **Dynamic Git Branch Fallback**: Automatically retries with `master` branch if fetching repository trees on the default `main` branch returns a 404 error.
@@ -24,27 +44,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] - 2026-09-10
+## 2026-09-10
 
 ### Added
-- **Zero-RAG AI Architecture**: Dynamic GitHub inspection powered by Model Context Protocol (MCP) tool execution, eliminating vector databases and stale embeddings.
-- **Dual-Mode MCP Client**: Primary stdio JSON-RPC 2.0 communication with automatic fallback to high-resilience HTTP REST adapter mode.
-- **16 Core MCP Tools**: Support for inspecting users, repositories, READMEs, file trees, commit histories, branches, tags, releases, pull requests, issues, and contributions.
 - **Followers & Social Graph Tools**: Added `list_user_followers` and `list_user_following` MCP tools.
+
+### Fixed
+- **Chat Input Box**: Fixed fixed-bottom chat input container styling and responsive alignment with sidebar collapse states.
+
+---
+
+## 2026-09-09
+
+### Fixed
+- **Location Rendering**: Fixed profile location display formatting on developer profile cards.
+
+### Changed
+- **Icon System Overhaul**: Replaced emojis across the interface with crisp inline base64 SVG icons (`utils/icons.py`) for a more consistent, professional design.
+
+---
+
+## 2026-09-06
+
+### Changed
+- **Local Model Proxy Setup**: Removed OpenRouter configuration and switched to local model proxy configuration (`http://localhost:4000/openai/v1`, `vscode-lm-proxy`).
+
+---
+
+## 2026-07-28
+
+### Added
+- **Initial Project Architecture**: Initialized GitHub Stalker Pro with Streamlit, local model proxy client, and Model Context Protocol (MCP) integration.
+- **Zero-RAG Design**: Real-time queries directly against GitHub's live APIs via MCP tool calling without vector databases or embedding pipelines.
+- **Dual-Mode MCP Client**: Stdio JSON-RPC 2.0 communication with automatic fallback to an internal HTTP REST adapter.
+- **Core MCP Tooling**: Initial suite of MCP tools for inspecting users, repositories, README files, file trees, commit histories, branches, tags, releases, pull requests, issues, and contributions.
 - **Interactive Analytics Dashboard**:
-  - Profile banner with followers, following, company, location, and website metadata.
+  - Profile banner with followers, following, company, location, and website links.
   - Interactive Altair-powered programming language distribution bar charts and badges.
-  - Top starred repository cards with star/fork counters and **"Focus in Chat"** context locking buttons.
-  - Organization memberships and recent public activity timeline expanders.
+  - Top starred repository cards with star/fork statistics and **"Focus in Chat"** context locking buttons.
+  - Expandable panels for affiliated organizations and recent public activity events.
 - **Deep AI Conversation Interface**:
-  - Real-time token streaming from OpenAI Responses API / local model proxy.
+  - Real-time response streaming from OpenAI Responses API / local model proxy.
   - Expandable MCP Tool Execution logs displaying exact JSON arguments and tool outputs.
   - Interactive suggested prompts grid for instant architectural questions.
-  - Pinned bottom viewport chat input with automatic sidebar collapse adjustment.
-- **Local Model Proxy Integration**: Support for running against local proxies (e.g. `vscode-lm-proxy`) via `OPENAI_BASE_URL` and `OPENAI_MODEL`.
-- **Design System & Styling**:
-  - GitHub Primer-inspired dark theme with glassmorphism cards and glowing gradients.
-  - Typography powered by Google Font **Outfit** and **JetBrains Mono**.
-  - Crisp base64-encoded SVG icons (`utils/icons.py`).
-- **In-Memory Caching**: Session-level metric caching to prevent GitHub API rate limiting.
-- **Automated Verification**: Pydantic models, helper utilities, and service initialization tests in `test_app.py`.
+- **In-Memory Caching**: Session-level caching for profile metrics to avoid GitHub API rate limiting.
+- **Testing & Verification**: Initial test harness in `test_app.py` for models, helpers, and service initialization.
