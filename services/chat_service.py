@@ -31,7 +31,14 @@ CRITICAL EFFICIENCY RULES:
 4. When searching for specific files (e.g. `.env`, `Dockerfile`, configuration files, secrets) across repositories, call `list_user_repositories` to discover repositories, inspect directory trees via `get_repository_tree` (with `recursive=True`), and summarize your findings promptly.
 5. If a tool returns an empty list `[]` or indicates no items (e.g. `list_user_organizations` returning no organizations), accept this as the definitive result. DO NOT call the tool again with the same arguments.
 6. NEVER repeat a tool call with identical arguments in the same query. Once a tool has returned its output, proceed directly to synthesize your narrative answer.
-7. ALWAYS provide a clear, direct narrative text answer after calling tools. Never conclude your response with only tool calls and no explanatory text."""
+7. When asked about GitHub Discussions, community questions, Q&A, announcements, or discussion content:
+   - YOU HAVE DIRECT ACCESS TO DISCUSSION CONTENT via `list_discussions` and `search_discussions`.
+   - Each repository returned by `list_user_repositories` includes `has_discussions: true/false`. Use this to immediately identify which repositories have discussions enabled.
+   - When asked "what is there in those discussions?", "what are they about?", or to inspect discussions for specific repositories, call `list_discussions` with `owner` and `repo` (e.g. `owner: "arcaneleague18", repo: "github-stalker-pro"`).
+   - To search discussions opened by a user across all repositories, call `search_discussions` with `query="author:USERNAME"`.
+   - To search discussions within a specific repository, call `list_discussions(owner, repo)` or `search_discussions(query="repo:OWNER/REPO")`.
+   - NEVER state that you cannot retrieve discussion content or that tools are unavailable for discussions.
+8. ALWAYS provide a clear, direct narrative text answer after calling tools. Never conclude your response with only tool calls and no explanatory text."""
 
 # Comparative System Prompt for cross-developer inquiries
 COMPARISON_BASE_SYSTEM_PROMPT = """You are an elite software engineering architect and GitHub intelligence assistant specializing in cross-developer comparative analysis.
@@ -54,11 +61,13 @@ GUIDELINES FOR COMPARATIVE INQUIRIES:
 3. Architecture, Code Quality & Tech Stack Comparison ("Do any of their repos have similar architecture?"):
    - Call `list_user_repositories` for both developers to view their project catalog and star/fork distributions.
    - Use `get_repository_tree` and `get_file_contents` to inspect file trees, configuration manifests (e.g., package.json, Cargo.toml, pyproject.toml, Dockerfile), and READMEs of their flagship repositories to compare design patterns, modular architecture, and tech stacks.
-4. Organization & Empty Results:
+4. Discussions & Community Engagement ("Did they start discussions?", "Do they engage in Q&A?"):
+   - Use `search_discussions` (e.g. `author:USER1` or `repo:USER2/REPO author:USER1`) and `list_discussions` to inspect community discussions, proposals, and Q&A interactions for both developers.
+5. Organization & Empty Results:
    - If a tool returns an empty list `[]` or indicates no data exists, accept that finding. Do not repeatedly call the same tool with identical arguments.
-5. Tone & Style:
+6. Tone & Style:
    - Provide articulate, structured, and insightful comparisons highlighting complementary engineering strengths, differing architectural paradigms, and open-source reach.
-6. ALWAYS provide a clear, direct narrative text answer after completing tool calls. Never terminate with only tool calls and no explanatory text."""
+7. ALWAYS provide a clear, direct narrative text answer after completing tool calls. Never terminate with only tool calls and no explanatory text."""
 
 class ChatService:
     """Orchestrates multi-turn chat loops, system prompt injection, and dynamic MCP tool execution."""
@@ -123,11 +132,14 @@ class ChatService:
                             "arguments": json.dumps(tc.arguments)
                         }
                     })
+                    res_str = str(tc.result) if tc.result else "No content returned."
+                    if len(res_str) > 1200:
+                        res_str = res_str[:1200] + "... (truncated for brevity)"
                     tool_result_messages.append({
                         "role": "tool",
                         "tool_call_id": tc.id,
                         "name": tc.tool_name,
-                        "content": str(tc.result) if tc.result else "No content returned."
+                        "content": res_str
                     })
                 messages.append({"role": "assistant", "content": msg.content or None, "tool_calls": t_calls})
                 messages.extend(tool_result_messages)

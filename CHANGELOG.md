@@ -4,6 +4,15 @@ All notable changes to the **GitHub Stalker Pro** project are documented here ch
 
 ## 2026-09-16
 
+### Added
+- **GitHub Discussions MCP Tools (`list_discussions` & `search_discussions`)**:
+  - Implemented `list_discussions` in `services/mcp_service.py` to retrieve discussions for any repository via GitHub GraphQL API v4, including titles, categories (e.g. Q&A, Announcements, Ideas), authors, creation timestamps, answers, and comment counts.
+  - Implemented `search_discussions` in `services/mcp_service.py` to query discussions globally or across repositories by author (`author:USERNAME`), repository (`repo:OWNER/REPO`), or keywords.
+  - Added `has_discussions` boolean property to `list_user_repositories` output, allowing the LLM to verify discussion availability across all user repositories in a single tool call without issuing 30+ individual `get_repository` requests.
+  - Compacted `get_repository` payload and added truncation (>1200 chars) for historical tool outputs in `services/chat_service.py` to protect the model's context window.
+  - Added Rule 7 to `BASE_SYSTEM_PROMPT` and Guideline 4 to `COMPARISON_BASE_SYSTEM_PROMPT` in `services/chat_service.py` instructing the assistant to use `list_discussions` and `search_discussions` when answering questions about discussions, Q&A, and community threads.
+  - Added unit test coverage in `test_app.py` for discussion tool schemas and OpenAI function definitions.
+
 ### Fixed
 - **AI Chat TypeError When tools=None**:
   - Resolved `TypeError: object of type 'NoneType' has no len()` occurring in `services/openai_service.py` during the guaranteed synthesis turn.

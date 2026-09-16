@@ -63,7 +63,19 @@ def test_mcp_tools():
     search_tool = mcp_client.tools["search_issues"].to_openai_tool()
     assert search_tool["type"] == "function"
     assert "query" in search_tool["function"]["parameters"]["properties"]
-    assert len(FALLBACK_TOOLS) >= 4
+
+    assert "list_discussions" in mcp_client.tools
+    list_disc_tool = mcp_client.tools["list_discussions"].to_openai_tool()
+    assert list_disc_tool["type"] == "function"
+    assert "owner" in list_disc_tool["function"]["parameters"]["properties"]
+    assert "repo" in list_disc_tool["function"]["parameters"]["properties"]
+
+    assert "search_discussions" in mcp_client.tools
+    search_disc_tool = mcp_client.tools["search_discussions"].to_openai_tool()
+    assert search_disc_tool["type"] == "function"
+    assert "query" in search_disc_tool["function"]["parameters"]["properties"]
+
+    assert len(FALLBACK_TOOLS) >= 6
     logger.info(" MCP tool conversion to OpenAI function schema validated successfully")
 
 def test_services():

@@ -222,13 +222,39 @@ STANDARD_GITHUB_MCP_TOOLS = [
             },
             "required": ["query"]
         }
+    ),
+    MCPToolDefinition(
+        name="list_discussions",
+        description="List discussions in a specific GitHub repository, including titles, bodies, categories (e.g. Q&A, Announcements, Ideas), author, answered status, answers, and comments.",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "owner": {"type": "string", "description": "The repository owner."},
+                "repo": {"type": "string", "description": "The repository name."},
+                "category": {"type": "string", "description": "Optional category name filter (e.g. 'Q&A', 'Announcements', 'General')."},
+                "per_page": {"type": "integer", "description": "Number of discussions to return (default 15, max 30).", "default": 15}
+            },
+            "required": ["owner", "repo"]
+        }
+    ),
+    MCPToolDefinition(
+        name="search_discussions",
+        description="Search GitHub Discussions across repositories or users using GitHub query syntax (e.g. 'author:USERNAME', 'repo:OWNER/REPO', 'repo:OWNER/REPO author:USERNAME', or keywords).",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "The search query syntax, such as 'author:USERNAME' or 'repo:OWNER/REPO'."},
+                "per_page": {"type": "integer", "description": "Number of discussions to return (default 15, max 30).", "default": 15}
+            },
+            "required": ["query"]
+        }
     )
 ]
 
 # Custom tools that fallback to HTTP REST adapter or extend standard stdio functionality
 FALLBACK_TOOLS = [
     t for t in STANDARD_GITHUB_MCP_TOOLS
-    if t.name in ("get_user_contributions", "list_user_followers", "list_user_following", "search_issues")
+    if t.name in ("get_user_contributions", "list_user_followers", "list_user_following", "search_issues", "list_discussions", "search_discussions")
 ]
 
 class MCPClient:
@@ -405,7 +431,8 @@ class MCPClient:
         logger.info(f"MCP Call: {tool_name} with args: {arguments}")
 
         # 1. Intercept custom tools that stdio does not support natively
-        if tool_name in ("get_user_contributions", "list_user_followers", "list_user_following", "search_issues"):
+        fallback_names = {t.name for t in FALLBACK_TOOLS}
+        if tool_name in fallback_names:
             return self._execute_rest_adapter(tool_name, arguments)
 
         # 2. Try stdio if connected and process active
@@ -498,6 +525,7 @@ class MCPClient:
                         "stars": r.get("stargazers_count"),
                         "forks": r.get("forks_count"),
                         "language": r.get("language"),
+                        "has_discussions": r.get("has_discussions", False),
                         "url": r.get("html_url")
                     } for r in repos
                 ]
@@ -509,7 +537,22 @@ class MCPClient:
                 if res.status_code == 404:
                     return f"Repository '{args['owner']}/{args['repo']}' not found."
                 res.raise_for_status()
-                return json.dumps(res.json(), indent=2)
+                r = res.json()
+                summary = {
+                    "name": r.get("name"),
+                    "full_name": r.get("full_name"),
+                    "description": r.get("description"),
+                    "stars": r.get("stargazers_count"),
+                    "forks": r.get("forks_count"),
+                    "language": r.get("language"),
+                    "has_discussions": r.get("has_discussions", False),
+                    "open_issues_count": r.get("open_issues_count"),
+                    "default_branch": r.get("default_branch"),
+                    "created_at": r.get("created_at"),
+                    "updated_at": r.get("updated_at"),
+                    "url": r.get("html_url")
+                }
+                return json.dumps(summary, indent=2)
 
             elif tool_name == "get_file_contents":
                 url = f"{base_url}/repos/{args['owner']}/{args['repo']}/contents/{args['path']}"
@@ -686,6 +729,199 @@ class MCPClient:
                 return json.dumps({
                     "total_count": data.get("total_count", 0),
                     "items": summary
+                }, indent=2)
+
+            elif tool_name == "list_discussions":
+                owner = args.get("owner", "").strip()
+                repo = args.get("repo", "").strip()
+                category_filter = args.get("category")
+                per_page = min(int(args.get("per_page", 15)), 30)
+
+                graphql_query = """
+                query GetRepoDiscussions($owner: String!, $name: String!, $first: Int!) {
+                  repository(owner: $owner, name: $name) {
+                    discussions(first: $first, orderBy: {field: CREATED_AT, direction: DESC}) {
+                      totalCount
+                      nodes {
+                        number
+                        title
+                        body
+                        createdAt
+                        url
+                        author { login }
+                        category { name }
+                        answer {
+                          body
+                          author { login }
+                        }
+                        comments { totalCount }
+                      }
+                    }
+                  }
+                }
+                """
+                graphql_url = "https://api.github.com/graphql"
+                gql_headers = {
+                    "Content-Type": "application/json",
+                    "User-Agent": "github-stalker-pro"
+                }
+                if pat:
+                    gql_headers["Authorization"] = f"token {pat}"
+
+                res = requests.post(
+                    graphql_url,
+                    json={"query": graphql_query, "variables": {"owner": owner, "name": repo, "first": per_page}},
+                    headers=gql_headers,
+                    timeout=12
+                )
+                res.raise_for_status()
+                res_data = res.json()
+
+                if "errors" in res_data:
+                    err_msg = res_data["errors"][0].get("message", "Unknown GraphQL error")
+                    return f"GitHub Discussions Error for repository '{owner}/{repo}': {err_msg}"
+
+                repo_data = res_data.get("data", {}).get("repository")
+                if not repo_data:
+                    return f"Repository '{owner}/{repo}' was not found or Discussions are disabled."
+
+                discussions_data = repo_data.get("discussions", {})
+                total_count = discussions_data.get("totalCount", 0)
+                nodes = discussions_data.get("nodes", [])
+
+                if category_filter:
+                    nodes = [n for n in nodes if n.get("category", {}).get("name", "").lower() == str(category_filter).lower()]
+
+                if not nodes:
+                    msg = f"No discussions found in repository '{owner}/{repo}'"
+                    if category_filter:
+                        msg += f" under category '{category_filter}'"
+                    return json.dumps({"repository": f"{owner}/{repo}", "total_count": 0, "discussions": [], "message": msg + "."}, indent=2)
+
+                import re
+                formatted = []
+                for n in nodes:
+                    body_text = n.get("body", "") or ""
+                    clean_body = re.sub(r"<!--.*?-->", "", body_text, flags=re.DOTALL).strip()
+                    ans = n.get("answer")
+                    formatted.append({
+                        "number": n.get("number"),
+                        "title": n.get("title"),
+                        "category": n.get("category", {}).get("name"),
+                        "author": n.get("author", {}).get("login"),
+                        "created_at": n.get("createdAt"),
+                        "url": n.get("url"),
+                        "is_answered": bool(ans),
+                        "answered_by": ans.get("author", {}).get("login") if ans else None,
+                        "answer_snippet": (ans.get("body") or "")[:250] if ans else None,
+                        "comments_count": n.get("comments", {}).get("totalCount", 0),
+                        "snippet": clean_body[:350]
+                    })
+
+                return json.dumps({
+                    "repository": f"{owner}/{repo}",
+                    "total_count": total_count,
+                    "discussions": formatted
+                }, indent=2)
+
+            elif tool_name == "search_discussions":
+                query = args.get("query", "").strip()
+                per_page = min(int(args.get("per_page", 15)), 30)
+
+                # Fallback to build query if owner/repo or author was supplied separately
+                if not query:
+                    parts = []
+                    if args.get("owner") and args.get("repo"):
+                        parts.append(f"repo:{args['owner']}/{args['repo']}")
+                    if args.get("author"):
+                        parts.append(f"author:{args['author']}")
+                    query = " ".join(parts)
+
+                if not query:
+                    return "Error: A search query or repository/author is required to search discussions."
+
+                graphql_query = """
+                query SearchDiscussions($query: String!, $first: Int!) {
+                  search(query: $query, type: DISCUSSION, first: $first) {
+                    discussionCount
+                    nodes {
+                      ... on Discussion {
+                        number
+                        title
+                        body
+                        createdAt
+                        url
+                        author { login }
+                        repository { nameWithOwner }
+                        category { name }
+                        answer {
+                          body
+                          author { login }
+                        }
+                        comments { totalCount }
+                      }
+                    }
+                  }
+                }
+                """
+                graphql_url = "https://api.github.com/graphql"
+                gql_headers = {
+                    "Content-Type": "application/json",
+                    "User-Agent": "github-stalker-pro"
+                }
+                if pat:
+                    gql_headers["Authorization"] = f"token {pat}"
+
+                res = requests.post(
+                    graphql_url,
+                    json={"query": graphql_query, "variables": {"query": query, "first": per_page}},
+                    headers=gql_headers,
+                    timeout=12
+                )
+                res.raise_for_status()
+                res_data = res.json()
+
+                if "errors" in res_data:
+                    err_msg = res_data["errors"][0].get("message", "Unknown GraphQL error")
+                    return f"GitHub Discussions Search Error: {err_msg}"
+
+                search_data = res_data.get("data", {}).get("search", {})
+                total_count = search_data.get("discussionCount", 0)
+                nodes = search_data.get("nodes", [])
+
+                if not nodes:
+                    return json.dumps({
+                        "query": query,
+                        "total_count": 0,
+                        "discussions": [],
+                        "message": f"No discussions found matching query '{query}'."
+                    }, indent=2)
+
+                import re
+                formatted = []
+                for n in nodes:
+                    body_text = n.get("body", "") or ""
+                    clean_body = re.sub(r"<!--.*?-->", "", body_text, flags=re.DOTALL).strip()
+                    ans = n.get("answer")
+                    formatted.append({
+                        "number": n.get("number"),
+                        "title": n.get("title"),
+                        "category": n.get("category", {}).get("name"),
+                        "author": n.get("author", {}).get("login"),
+                        "repository": n.get("repository", {}).get("nameWithOwner"),
+                        "created_at": n.get("createdAt"),
+                        "url": n.get("url"),
+                        "is_answered": bool(ans),
+                        "answered_by": ans.get("author", {}).get("login") if ans else None,
+                        "answer_snippet": (ans.get("body") or "")[:250] if ans else None,
+                        "comments_count": n.get("comments", {}).get("totalCount", 0),
+                        "snippet": clean_body[:350]
+                    })
+
+                return json.dumps({
+                    "query": query,
+                    "total_count": total_count,
+                    "discussions": formatted
                 }, indent=2)
 
             else:
