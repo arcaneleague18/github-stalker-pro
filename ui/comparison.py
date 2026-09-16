@@ -6,6 +6,7 @@ from typing import Optional
 from services import github_service, openai_service
 from utils import format_number, format_timestamp, get_language_color, get_logger
 from config import settings
+from .comparison_chat import render_comparison_chat
 
 logger = get_logger(__name__)
 
@@ -202,219 +203,249 @@ def render_comparison_page():
 
     st.markdown("---")
 
-    # ==========================================
-    # 4. Side-by-Side Profile Dossiers
-    # ==========================================
-    col_p1, col_p2 = st.columns(2)
-    with col_p1:
-        avatar1 = u1.avatar_url or "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-        st.markdown(
-            f"""
-            <div class="profile-card" style="height:100%;">
-                <img src="{avatar1}" class="profile-avatar" alt="{u1.login}"/>
-                <div class="profile-name">{u1.display_name}</div>
-                <div class="profile-username"><a href="https://github.com/{u1.login}" target="_blank" style="color:#58a6ff; text-decoration:none;">@{u1.login}</a></div>
-                <div class="profile-bio">{u1.bio or 'No bio available.'}</div>
-                <div class="profile-meta">
-                    <span class="meta-item">📍 {u1.location or 'Global'}</span>
-                    <span class="meta-item">🏢 {u1.company or 'Independent'}</span>
-                    <span class="meta-item">👥 <b>{format_number(u1.followers)}</b> Followers</span>
+    tab_battle, tab_chat = st.tabs(["⚔️ Comparative Dashboard", "💬 Dual-Developer AI Chat"])
+
+    with tab_battle:
+        # ==========================================
+        # 4. Side-by-Side Profile Dossiers
+        # ==========================================
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            avatar1 = u1.avatar_url or "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            st.markdown(
+                f"""
+                <div class="profile-card" style="height:100%;">
+                    <img src="{avatar1}" class="profile-avatar" alt="{u1.login}"/>
+                    <div class="profile-name">{u1.display_name}</div>
+                    <div class="profile-username"><a href="https://github.com/{u1.login}" target="_blank" style="color:#58a6ff; text-decoration:none;">@{u1.login}</a></div>
+                    <div class="profile-bio">{u1.bio or 'No bio available.'}</div>
+                    <div class="profile-meta">
+                        <span class="meta-item">📍 {u1.location or 'Global'}</span>
+                        <span class="meta-item">🏢 {u1.company or 'Independent'}</span>
+                        <span class="meta-item">👥 <b>{format_number(u1.followers)}</b> Followers</span>
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                """,
+                unsafe_allow_html=True
+            )
 
-    with col_p2:
-        avatar2 = u2.avatar_url or "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-        st.markdown(
-            f"""
-            <div class="profile-card" style="height:100%;">
-                <img src="{avatar2}" class="profile-avatar" alt="{u2.login}"/>
-                <div class="profile-name">{u2.display_name}</div>
-                <div class="profile-username"><a href="https://github.com/{u2.login}" target="_blank" style="color:#f778ba; text-decoration:none;">@{u2.login}</a></div>
-                <div class="profile-bio">{u2.bio or 'No bio available.'}</div>
-                <div class="profile-meta">
-                    <span class="meta-item">📍 {u2.location or 'Global'}</span>
-                    <span class="meta-item">🏢 {u2.company or 'Independent'}</span>
-                    <span class="meta-item">👥 <b>{format_number(u2.followers)}</b> Followers</span>
+        with col_p2:
+            avatar2 = u2.avatar_url or "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+            st.markdown(
+                f"""
+                <div class="profile-card" style="height:100%;">
+                    <img src="{avatar2}" class="profile-avatar" alt="{u2.login}"/>
+                    <div class="profile-name">{u2.display_name}</div>
+                    <div class="profile-username"><a href="https://github.com/{u2.login}" target="_blank" style="color:#f778ba; text-decoration:none;">@{u2.login}</a></div>
+                    <div class="profile-bio">{u2.bio or 'No bio available.'}</div>
+                    <div class="profile-meta">
+                        <span class="meta-item">📍 {u2.location or 'Global'}</span>
+                        <span class="meta-item">🏢 {u2.company or 'Independent'}</span>
+                        <span class="meta-item">👥 <b>{format_number(u2.followers)}</b> Followers</span>
+                    </div>
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                """,
+                unsafe_allow_html=True
+            )
 
-    st.markdown("<br/>", unsafe_allow_html=True)
+        st.markdown("<br/>", unsafe_allow_html=True)
 
-    # ==========================================
-    # 5. Head-to-Head Scorecard
-    # ==========================================
-    st.subheader("📊 Head-to-Head Scorecard")
-    
-    def render_metric_battle(label, val1, val2, num1, num2):
-        lead1 = "🏆" if num1 > num2 else ""
-        lead2 = "🏆" if num2 > num1 else ""
-        border1 = "border:1px solid #58a6ff;" if num1 > num2 else "border:1px solid #30363d;"
-        border2 = "border:1px solid #f778ba;" if num2 > num1 else "border:1px solid #30363d;"
+        # ==========================================
+        # 5. Head-to-Head Scorecard
+        # ==========================================
+        st.subheader("📊 Head-to-Head Scorecard")
         
-        st.markdown(
-            f"""
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#161b22; border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:0.8rem; border:1px solid #30363d;">
-                <div style="flex:1; text-align:left; font-size:1.1rem; font-weight:700; color:#58a6ff;">
-                    {val1} <span style="font-size:0.85rem; color:#e3b341;">{lead1}</span>
-                </div>
-                <div style="flex:1; text-align:center; text-transform:uppercase; font-size:0.85rem; color:#8b949e; letter-spacing:1px; font-weight:600;">
-                    {label}
-                </div>
-                <div style="flex:1; text-align:right; font-size:1.1rem; font-weight:700; color:#f778ba;">
-                    <span style="font-size:0.85rem; color:#e3b341;">{lead2}</span> {val2}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    render_metric_battle("Total Stars Earned", f"★ {format_number(s1.total_stars)}", f"★ {format_number(s2.total_stars)}", s1.total_stars, s2.total_stars)
-    render_metric_battle("Followers", format_number(u1.followers), format_number(u2.followers), u1.followers, u2.followers)
-    render_metric_battle("Public Repositories", str(s1.total_repos), str(s2.total_repos), s1.total_repos, s2.total_repos)
-    render_metric_battle("Total Forks", f"⑂ {format_number(s1.total_forks)}", f"⑂ {format_number(s2.total_forks)}", s1.total_forks, s2.total_forks)
-    render_metric_battle("Affiliated Organizations", str(len(m1.orgs)), str(len(m2.orgs)), len(m1.orgs), len(m2.orgs))
-
-    st.markdown("<br/>", unsafe_allow_html=True)
-
-    # ==========================================
-    # 6. Comparative Language Distribution
-    # ==========================================
-    st.subheader("💻 Comparative Language Breakdown")
-    
-    # Collect top languages from both
-    lang_rows = []
-    for l in m1.language_breakdown[:6]:
-        lang_rows.append({"Language": l.language, "Percentage": l.percentage, "Developer": f"@{u1.login}"})
-    for l in m2.language_breakdown[:6]:
-        lang_rows.append({"Language": l.language, "Percentage": l.percentage, "Developer": f"@{u2.login}"})
-
-    if lang_rows:
-        df_lang = pd.DataFrame(lang_rows)
-        
-        # Grouped horizontal bar chart
-        chart = alt.Chart(df_lang).mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4).encode(
-            x=alt.X('Percentage:Q', title='Percentage of Repositories (%)'),
-            y=alt.Y('Language:N', sort='-x', title=None),
-            color=alt.Color('Developer:N', scale=alt.Scale(domain=[f"@{u1.login}", f"@{u2.login}"], range=['#58a6ff', '#f778ba'])),
-            yOffset='Developer:N',
-            tooltip=['Developer', 'Language', alt.Tooltip('Percentage:Q', format='.1f')]
-        ).properties(height=260).configure_view(strokeWidth=0).configure_axis(
-            labelColor="#8b949e", titleColor="#c9d1d9", gridColor="#21262d"
-        ).configure_legend(labelColor="#c9d1d9", titleColor="#58a6ff")
-
-        st.altair_chart(chart, use_container_width=True)
-    else:
-        st.info("No programming language statistics available for comparison.")
-
-    st.markdown("<br/>", unsafe_allow_html=True)
-
-    # ==========================================
-    # 7. Top Starred Repositories Battle
-    # ==========================================
-    st.subheader("🌟 Top Starred Repositories Showdown")
-    col_r1, col_r2 = st.columns(2)
-    
-    with col_r1:
-        st.markdown(f"<h4 style='color:#58a6ff; font-size:1.1rem; margin-bottom:1rem;'>@{u1.login}'s Best Projects</h4>", unsafe_allow_html=True)
-        if s1.top_repos:
-            for r in s1.top_repos[:3]:
-                lang_color = get_language_color(r.language)
-                desc = r.description or "No description provided."
-                st.markdown(
-                    f"""
-                    <div class="repo-card" style="margin-bottom:0.8rem;">
-                        <div class="repo-title">
-                            <a href="{r.html_url or f'https://github.com/{r.full_name}'}" target="_blank" style="color:#58a6ff; text-decoration:none;">📦 {r.name}</a>
+        def render_metric_battle(label, val1, val2, num1, num2):
+            lead1 = "🏆" if num1 > num2 else ""
+            lead2 = "🏆" if num2 > num1 else ""
+            border1 = "border:1px solid #58a6ff;" if num1 > num2 else "border:1px solid #30363d;"
+            border2 = "border:1px solid #f778ba;" if num2 > num1 else "border:1px solid #30363d;"
+            
+            st.markdown(
+                f"""
+                <div style="background:#161b22; border-radius:12px; border:1px solid #30363d; padding:0.8rem 1.2rem; margin-bottom:0.7rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="flex:1; text-align:left;">
+                            <span style="font-size:1.15rem; font-weight:700; color:#58a6ff;">{val1}</span>
+                            <span style="font-size:0.85rem; margin-left:0.3rem;">{lead1}</span>
                         </div>
-                        <div class="repo-desc">{desc[:85] + '...' if len(desc) > 85 else desc}</div>
-                        <div class="repo-stats">
-                            <span><span class="lang-dot" style="background:{lang_color};"></span> {r.language or 'Unknown'}</span>
-                            <span>★ {format_number(r.stargazers_count)}</span>
-                            <span>⑂ {format_number(r.forks_count)}</span>
+                        <div style="flex:1; text-align:center; color:#8b949e; font-weight:600; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px;">
+                            {label}
+                        </div>
+                        <div style="flex:1; text-align:right;">
+                            <span style="font-size:0.85rem; margin-right:0.3rem;">{lead2}</span>
+                            <span style="font-size:1.15rem; font-weight:700; color:#f778ba;">{val2}</span>
                         </div>
                     </div>
-                    """,
-                    unsafe_allow_html=True
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        render_metric_battle("Total Stars Earned", format_number(s1.total_stars), format_number(s2.total_stars), s1.total_stars, s2.total_stars)
+        render_metric_battle("Followers", format_number(u1.followers), format_number(u2.followers), u1.followers, u2.followers)
+        render_metric_battle("Public Repositories", str(s1.total_repos), str(s2.total_repos), s1.total_repos, s2.total_repos)
+        render_metric_battle("Total Forks", format_number(s1.total_forks), format_number(s2.total_forks), s1.total_forks, s2.total_forks)
+        render_metric_battle("Organizations", str(len(m1.orgs)), str(len(m2.orgs)), len(m1.orgs), len(m2.orgs))
+
+        st.markdown("<br/>", unsafe_allow_html=True)
+
+        # ==========================================
+        # 6. Grouped Language Distribution
+        # ==========================================
+        st.subheader("🌐 Comparative Language Breakdown")
+        
+        l1_dict = {l.language: l.percentage for l in m1.language_breakdown}
+        l2_dict = {l.language: l.percentage for l in m2.language_breakdown}
+        all_langs = sorted(list(set(list(l1_dict.keys()) + list(l2_dict.keys()))))
+
+        if all_langs:
+            chart_data = []
+            for lang in all_langs[:10]:
+                chart_data.append({
+                    "Language": lang,
+                    "Percentage": l1_dict.get(lang, 0.0),
+                    "Developer": f"@{u1.login}"
+                })
+                chart_data.append({
+                    "Language": lang,
+                    "Percentage": l2_dict.get(lang, 0.0),
+                    "Developer": f"@{u2.login}"
+                })
+            
+            df_chart = pd.DataFrame(chart_data)
+
+            chart = (
+                alt.Chart(df_chart)
+                .mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                .encode(
+                    x=alt.X("Developer:N", title=None, axis=alt.Axis(labels=True, ticks=False)),
+                    y=alt.Y("Percentage:Q", title="Portfolio Share (%)", scale=alt.Scale(domain=[0, 100])),
+                    color=alt.Color(
+                        "Developer:N",
+                        scale=alt.Scale(
+                            domain=[f"@{u1.login}", f"@{u2.login}"],
+                            range=["#58a6ff", "#f778ba"]
+                        ),
+                        legend=alt.Legend(title="Developer", orient="top")
+                    ),
+                    column=alt.Column("Language:N", title=None, header=alt.Header(labelColor="#c9d1d9", labelFontSize=12)),
+                    tooltip=["Developer:N", "Language:N", "Percentage:Q"]
                 )
+                .properties(height=260)
+                .configure_view(stroke="transparent")
+                .configure_axis(gridColor="#21262d", domainColor="#30363d", labelColor="#8b949e", titleColor="#8b949e")
+            )
+            st.altair_chart(chart, use_container_width=True)
         else:
-            st.info(f"No public repositories found for @{u1.login}.")
+            st.info("No programming language metrics recorded for either developer.")
 
-    with col_r2:
-        st.markdown(f"<h4 style='color:#f778ba; font-size:1.1rem; margin-bottom:1rem;'>@{u2.login}'s Best Projects</h4>", unsafe_allow_html=True)
-        if s2.top_repos:
-            for r in s2.top_repos[:3]:
-                lang_color = get_language_color(r.language)
-                desc = r.description or "No description provided."
-                st.markdown(
-                    f"""
-                    <div class="repo-card" style="margin-bottom:0.8rem;">
-                        <div class="repo-title">
-                            <a href="{r.html_url or f'https://github.com/{r.full_name}'}" target="_blank" style="color:#f778ba; text-decoration:none;">📦 {r.name}</a>
+        st.markdown("<br/>", unsafe_allow_html=True)
+
+        # ==========================================
+        # 7. Top Repositories Showdown
+        # ==========================================
+        st.subheader("🌟 Top Starred Repositories Showdown")
+        col_r1, col_r2 = st.columns(2)
+        
+        with col_r1:
+            st.markdown(f"<h4 style='color:#58a6ff; font-size:1.1rem; margin-bottom:1rem;'>@{u1.login}'s Best Projects</h4>", unsafe_allow_html=True)
+            if s1.top_repos:
+                for r in s1.top_repos[:3]:
+                    lang_color = get_language_color(r.language)
+                    desc = r.description or "No description provided."
+                    st.markdown(
+                        f"""
+                        <div class="repo-card" style="margin-bottom:0.8rem;">
+                            <div class="repo-title">
+                                <a href="{r.html_url or f'https://github.com/{r.full_name}'}" target="_blank" style="color:#58a6ff; text-decoration:none;">📦 {r.name}</a>
+                            </div>
+                            <div class="repo-desc">{desc[:85] + '...' if len(desc) > 85 else desc}</div>
+                            <div class="repo-stats">
+                                <span><span class="lang-dot" style="background:{lang_color};"></span> {r.language or 'Unknown'}</span>
+                                <span>★ {format_number(r.stargazers_count)}</span>
+                                <span>⑂ {format_number(r.forks_count)}</span>
+                            </div>
                         </div>
-                        <div class="repo-desc">{desc[:85] + '...' if len(desc) > 85 else desc}</div>
-                        <div class="repo-stats">
-                            <span><span class="lang-dot" style="background:{lang_color};"></span> {r.language or 'Unknown'}</span>
-                            <span>★ {format_number(r.stargazers_count)}</span>
-                            <span>⑂ {format_number(r.forks_count)}</span>
+                        """,
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.info(f"No public repositories found for @{u1.login}.")
+
+        with col_r2:
+            st.markdown(f"<h4 style='color:#f778ba; font-size:1.1rem; margin-bottom:1rem;'>@{u2.login}'s Best Projects</h4>", unsafe_allow_html=True)
+            if s2.top_repos:
+                for r in s2.top_repos[:3]:
+                    lang_color = get_language_color(r.language)
+                    desc = r.description or "No description provided."
+                    st.markdown(
+                        f"""
+                        <div class="repo-card" style="margin-bottom:0.8rem;">
+                            <div class="repo-title">
+                                <a href="{r.html_url or f'https://github.com/{r.full_name}'}" target="_blank" style="color:#f778ba; text-decoration:none;">📦 {r.name}</a>
+                            </div>
+                            <div class="repo-desc">{desc[:85] + '...' if len(desc) > 85 else desc}</div>
+                            <div class="repo-stats">
+                                <span><span class="lang-dot" style="background:{lang_color};"></span> {r.language or 'Unknown'}</span>
+                                <span>★ {format_number(r.stargazers_count)}</span>
+                                <span>⑂ {format_number(r.forks_count)}</span>
+                            </div>
                         </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-        else:
-            st.info(f"No public repositories found for @{u2.login}.")
+                        """,
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.info(f"No public repositories found for @{u2.login}.")
 
-    st.markdown("<br/>", unsafe_allow_html=True)
+        st.markdown("<br/>", unsafe_allow_html=True)
 
-    # ==========================================
-    # 8. AI Architectural Comparison
-    # ==========================================
-    st.subheader("🤖 AI Architectural Comparison")
-    st.markdown(
-        """
-        <p style="color:#8b949e; font-size:0.95rem;">
-            Generate an in-depth AI architectural breakdown synthesizing software engineering paradigms, core technology stacks, and open-source footprints.
-        </p>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if st.session_state.compare_ai_analysis:
+        # ==========================================
+        # 8. AI Architectural Comparison
+        # ==========================================
+        st.subheader("🤖 AI Architectural Comparison")
         st.markdown(
-            f"""
-            <div class="glass-card" style="padding:1.5rem; border-left:4px solid #a371f7;">
-                {st.session_state.compare_ai_analysis}
-            </div>
+            """
+            <p style="color:#8b949e; font-size:0.95rem;">
+                Generate an in-depth AI architectural breakdown synthesizing software engineering paradigms, core technology stacks, and open-source footprints.
+            </p>
             """,
             unsafe_allow_html=True
         )
-        if st.button("🔄 Regenerate AI Comparison"):
-            st.session_state.compare_ai_analysis = None
-            st.rerun()
-    else:
-        if st.button("✨ Generate AI Architectural Synthesis", use_container_width=True):
-            with st.spinner("🤖 Consulting AI Model to analyze architectural contrast..."):
-                stream_gen = stream_ai_comparison(m1, m2)
-                full_text = st.write_stream(stream_gen)
-                st.session_state.compare_ai_analysis = full_text
-            st.rerun()
 
-    st.markdown("<br/>", unsafe_allow_html=True)
+        if st.session_state.compare_ai_analysis:
+            st.markdown(
+                f"""
+                <div class="glass-card" style="padding:1.5rem; border-left:4px solid #a371f7;">
+                    {st.session_state.compare_ai_analysis}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            if st.button("🔄 Regenerate AI Comparison"):
+                st.session_state.compare_ai_analysis = None
+                st.rerun()
+        else:
+            if st.button("✨ Generate AI Architectural Synthesis", use_container_width=True):
+                with st.spinner("🤖 Consulting AI Model to analyze architectural contrast..."):
+                    stream_gen = stream_ai_comparison(m1, m2)
+                    full_text = st.write_stream(stream_gen)
+                    st.session_state.compare_ai_analysis = full_text
+                st.rerun()
 
-    # ==========================================
-    # 9. Download Comparative Dossier
-    # ==========================================
-    report_content = generate_comparison_markdown(m1, m2, st.session_state.compare_ai_analysis)
-    st.download_button(
-        label="📥 Download Comparative Dossier (.md)",
-        data=report_content,
-        file_name=f"comparison_{u1.login}_vs_{u2.login}.md",
-        mime="text/markdown",
-        use_container_width=True
-    )
+        st.markdown("<br/>", unsafe_allow_html=True)
+
+        # ==========================================
+        # 9. Download Comparative Dossier
+        # ==========================================
+        report_content = generate_comparison_markdown(m1, m2, st.session_state.compare_ai_analysis)
+        st.download_button(
+            label="📥 Download Comparative Dossier (.md)",
+            data=report_content,
+            file_name=f"comparison_{u1.login}_vs_{u2.login}.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
+
+    with tab_chat:
+        render_comparison_chat(dev1, dev2)

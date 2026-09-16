@@ -15,6 +15,7 @@ class SessionService:
             st.session_state.current_username = None
             st.session_state.selected_repository = None
             st.session_state.messages = []
+            st.session_state.compare_messages = []
             st.session_state.mcp_status = "Disconnected"
             st.session_state.mcp_logs = []
             logger.info("Initialized new Streamlit session state")
@@ -62,6 +63,29 @@ class SessionService:
         st.session_state.messages = []
         st.session_state.mcp_logs = []
         logger.info("Cleared conversation history")
+
+    @property
+    def compare_messages(self) -> list[ChatMessage]:
+        return st.session_state.get("compare_messages", [])
+
+    def add_compare_message(self, role: str, content: str, tool_calls: Optional[list[ToolCallLog]] = None):
+        """Append a new message to the dual-developer comparison conversation history."""
+        from datetime import datetime
+        msg = ChatMessage(
+            role=role,
+            content=content,
+            tool_calls=tool_calls or [],
+            timestamp=datetime.now().strftime("%H:%M:%S")
+        )
+        if "compare_messages" not in st.session_state:
+            st.session_state.compare_messages = []
+        st.session_state.compare_messages.append(msg)
+        logger.debug(f"Added {role} message to compare session history (total: {len(st.session_state.compare_messages)})")
+
+    def clear_compare_chat(self):
+        """Clear dual-developer comparative conversation history."""
+        st.session_state.compare_messages = []
+        logger.info("Cleared comparison conversation history")
 
     @property
     def mcp_status(self) -> str:

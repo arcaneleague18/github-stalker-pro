@@ -47,12 +47,39 @@ def render_sidebar(is_comparison: bool = False):
                     <span style="font-size:0.75rem; color:#f778ba; font-weight:600; display:block; text-transform:uppercase; letter-spacing:0.5px;">⚔️ Mode Active</span>
                     <strong style="color:#ffffff; font-size:1rem;">Developer Comparison</strong>
                     <p style="color:#8b949e; font-size:0.75rem; margin:0.3rem 0 0 0; line-height:1.3;">
-                        Compare two developers side-by-side using the form on the page.
+                        Side-by-side metric battle and comparative AI assistant.
                     </p>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
+
+            if st.session_state.get("compare_submitted"):
+                dev1 = st.session_state.get("compare_user1", "")
+                dev2 = st.session_state.get("compare_user2", "")
+                if dev1 and dev2:
+                    st.markdown(
+                        f"""
+                        <div style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:0.5rem; text-align:center; font-size:0.8rem; margin-bottom:0.8rem;">
+                            <span style="color:#58a6ff; font-weight:600;">@{dev1}</span>
+                            <span style="color:#8b949e; margin:0 0.3rem;">vs</span>
+                            <span style="color:#f778ba; font-weight:600;">@{dev2}</span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                c1, c2 = st.columns(2)
+                with c1:
+                    if st.button("🔄 Reset", use_container_width=True, help="Change comparison developer targets"):
+                        st.session_state.compare_submitted = False
+                        st.session_state.compare_ai_analysis = None
+                        st.rerun()
+                with c2:
+                    if st.button("🗑️ Chat", use_container_width=True, help="Clear comparative chat history"):
+                        session_service.clear_compare_chat()
+                        st.toast("Comparison chat history cleared!")
+                        st.rerun()
             return
 
         st.markdown("<p style='font-size:0.85rem; text-transform:uppercase; color:#8b949e; letter-spacing:0.5px; font-weight:600; margin-bottom:0.4rem;'>🎯 Account Target</p>", unsafe_allow_html=True)

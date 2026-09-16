@@ -102,6 +102,27 @@ def test_comparison():
     assert "Head-to-Head Statistics" in dossier
     logger.info(" Comparison module and dossier generator validated successfully")
 
+    # Test Comparative Chat integration & system prompt
+    from ui import render_comparison_chat
+    from services import chat_service, session_service
+    assert callable(render_comparison_chat)
+
+    comp_prompt = chat_service.build_comparison_system_prompt("alpha_dev", "beta_dev")
+    assert "@alpha_dev" in comp_prompt
+    assert "@beta_dev" in comp_prompt
+    assert "Shared Projects" in comp_prompt
+    assert "Shared Organizations" in comp_prompt
+
+    # Test session isolation
+    session_service.clear_compare_chat()
+    assert len(session_service.compare_messages) == 0
+    session_service.add_compare_message("user", "Did they collaborate?")
+    assert len(session_service.compare_messages) == 1
+    assert session_service.compare_messages[0].content == "Did they collaborate?"
+    session_service.clear_compare_chat()
+    assert len(session_service.compare_messages) == 0
+    logger.info(" Comparative AI chat system prompt and session isolation validated successfully")
+
 def main():
     logger.info("=== Starting Github Stalker pro Verification Tests ===")
     try:

@@ -29,6 +29,30 @@ CRITICAL EFFICIENCY RULES:
 2. Do not call `list_issues` one-by-one unless specifically asked to analyze issues for a single specific repository.
 3. When asked for the "total number of contributions", "commits", "issues", or "PRs" for a specific timeframe, use the `get_user_contributions` tool with the username and `date_query` (e.g. `>2026-06-01` or `2025-01-01..2025-12-31`). This tool automatically counts commits, issues, and PRs all at once and returns the grand total."""
 
+# Comparative System Prompt for cross-developer inquiries
+COMPARISON_BASE_SYSTEM_PROMPT = """You are an elite software engineering architect and GitHub intelligence assistant specializing in cross-developer comparative analysis.
+
+You have direct access to GitHub via Model Context Protocol (MCP) tools.
+
+Always answer questions by using the GitHub MCP tools whenever factual information or verification is required.
+
+Never invent repositories. Never invent organizations. Never invent files. Never invent code.
+
+If information is unavailable or no shared history exists, clearly state that fact.
+
+GUIDELINES FOR COMPARATIVE INQUIRIES:
+1. Shared Projects & Collaborations ("Did they do any projects together?", "What are they?"):
+   - Check if either developer contributed to the other's repositories using `get_repository`, `list_commits`, or `search_issues` with queries like `author:USER1 repo:USER2/REPO` or `mentions:USER1 repo:USER2/REPO`.
+   - Use `search_issues` (e.g. `type:pr author:USER1 repo:USER2/...`) or `search_repositories` to find mutual repositories where both have participated.
+2. Shared Organizations & Contributions ("Are they part of any organization?", "What are their contributions in that organization?"):
+   - Call `list_user_organizations` for both developers to retrieve their public memberships and discover overlapping organizations.
+   - For shared organizations, use `search_issues` (e.g. `org:ORG_NAME author:USER1` and `org:ORG_NAME author:USER2`) to contrast their respective issue/PR contributions.
+3. Architecture, Code Quality & Tech Stack Comparison ("Do any of their repos have similar architecture?"):
+   - Call `list_user_repositories` for both developers to view their project catalog and star/fork distributions.
+   - Use `get_repository_tree` and `get_file_contents` to inspect file trees, configuration manifests (e.g., package.json, Cargo.toml, pyproject.toml, Dockerfile), and READMEs of their flagship repositories to compare design patterns, modular architecture, and tech stacks.
+4. Tone & Style:
+   - Provide articulate, structured, and insightful comparisons highlighting complementary engineering strengths, differing architectural paradigms, and open-source reach."""
+
 class ChatService:
     """Orchestrates multi-turn chat loops, system prompt injection, and dynamic MCP tool execution."""
 
@@ -46,17 +70,39 @@ class ChatService:
             
         return "\n".join(prompt_parts)
 
-    def prepare_messages(self, user_prompt: str) -> list[dict[str, Any]]:
+    def build_comparison_system_prompt(self, user1: str, user2: str) -> str:
+        """Construct the system prompt specifically for dual-developer comparisons."""
+        return (
+            f"{COMPARISON_BASE_SYSTEM_PROMPT}\n\n"
+            f"Active Comparison Targets:\n"
+            f"- Developer 1: @{user1}\n"
+            f"- Developer 2: @{user2}\n\n"
+            f"Always consider both developers (@{user1} and @{user2}) when interpreting and answering questions."
+        )
+
+    def prepare_messages(
+        self,
+        user_prompt: str,
+        is_comparison: bool = False,
+        compare_users: Optional[tuple[str, str]] = None
+    ) -> list[dict[str, Any]]:
         """Format session conversation history into OpenAI API message list format."""
-        username = session_service.current_username
-        selected_repo = session_service.selected_repository
-        
+        if is_comparison and compare_users:
+            u1, u2 = compare_users
+            sys_prompt = self.build_comparison_system_prompt(u1, u2)
+            source_messages = session_service.compare_messages
+        else:
+            username = session_service.current_username
+            selected_repo = session_service.selected_repository
+            sys_prompt = self.build_system_prompt(username, selected_repo)
+            source_messages = session_service.messages
+
         messages: list[dict[str, Any]] = [
-            {"role": "system", "content": self.build_system_prompt(username, selected_repo)}
+            {"role": "system", "content": sys_prompt}
         ]
 
         # Add existing session messages
-        for msg in session_service.messages:
+        for msg in source_messages:
             if msg.role == "assistant" and msg.tool_calls:
                 # Reconstruct tool calls format for OpenAI API
                 t_calls = []
@@ -92,7 +138,9 @@ class ChatService:
         self,
         user_prompt: str,
         status_container: Optional[Any] = None,
-        max_tool_turns: int = 5
+        max_tool_turns: int = 5,
+        is_comparison: bool = False,
+        compare_users: Optional[tuple[str, str]] = None
     ) -> Generator[str, None, None]:
         """Stream chat completion from OpenAI, dynamically executing MCP tools when requested.
         
@@ -100,13 +148,19 @@ class ChatService:
             user_prompt: The user's input question.
             status_container: Optional Streamlit container/expander to display live MCP execution status.
             max_tool_turns: Maximum number of iterative tool calling turns to prevent infinite loops.
+            is_comparison: Whether this is in dual-developer comparison mode.
+            compare_users: Tuple of (user1, user2) when is_comparison is True.
         """
         # Ensure MCP client is connected
         if not mcp_client.connected:
             mcp_client.connect()
 
         # Prepare messages
-        messages = self.prepare_messages(user_prompt)
+        messages = self.prepare_messages(
+            user_prompt,
+            is_comparison=is_comparison,
+            compare_users=compare_users
+        )
         tools = mcp_client.get_openai_tools()
 
         turn_count = 0

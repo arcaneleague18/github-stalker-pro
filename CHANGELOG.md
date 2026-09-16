@@ -5,6 +5,13 @@ All notable changes to the **GitHub Stalker Pro** project are documented here ch
 ## 2026-09-15
 
 ### Added
+- **Dual-Developer Comparative AI Chat**:
+  - Added dedicated `render_comparison_chat` in `ui/comparison_chat.py` integrated as a top-level tab (`💬 Dual-Developer AI Chat`) on the Developer Comparison page.
+  - Implemented cross-developer comparative system prompt in `services/chat_service.py` (`build_comparison_system_prompt`) instructing the model on finding shared projects, mutual repository contributions, shared organizations, and comparing repository architectures via MCP tools.
+  - Added quick comparative suggested questions ("Did they do any projects together?", "Are they part of any shared organization?", "What are their contributions in that organization?", "Do any of their repos have similar architecture?").
+  - Isolated comparative session history in `services/session_service.py` (`compare_messages`, `add_compare_message`, `clear_compare_chat`) preventing cross-contamination with single-account chat.
+  - Added sidebar controls in comparison mode allowing one-click clearing of comparative chat and resetting targets.
+  - Added automated test coverage in `test_app.py` validating comparative system prompt generation and session isolation.
 - **Developer Comparison Showdown (Separate Page)**:
   - Implemented Streamlit 1.36+ `st.navigation` multi-page routing with **👤 Account Inspector** and **⚔️ Compare Developers** tabs.
   - Added dedicated comparison interface in `ui/comparison.py` allowing any two GitHub developers to be compared side-by-side.
