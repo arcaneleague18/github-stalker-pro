@@ -2,6 +2,25 @@
 
 All notable changes to the **GitHub Stalker Pro** project are documented here chronologically by date.
 
+## 2026-09-16
+
+### Fixed
+- **AI Chat TypeError When tools=None**:
+  - Resolved `TypeError: object of type 'NoneType' has no len()` occurring in `services/openai_service.py` during the guaranteed synthesis turn.
+  - Root cause: `len(tools)` was evaluated outside the `try` block before checking if `tools` was `None`.
+  - Updated `stream_chat_with_tools` to type `tools: Optional[list[dict[str, Any]]] = None`, evaluate `num_tools = len(tools) if tools is not None else 0`, and wrap initialization inside the primary `try` block.
+- **Repetitive Tool Call Loop Prevention**:
+  - Implemented loop detection in `services/chat_service.py`: if all tool calls requested in a turn have already been executed with identical arguments, the service immediately breaks to the synthesis turn rather than repeating redundant API requests.
+  - Enhanced `list_user_organizations` in `services/mcp_service.py` to return an explicit note (`"[] (User is not a member of any public organizations)"`) when empty, eliminating model confusion over empty JSON lists.
+  - Added rules 5 and 6 to `BASE_SYSTEM_PROMPT` and rule 4 to `COMPARISON_BASE_SYSTEM_PROMPT` instructing the LLM to accept empty list results without looping and never repeat identical tool calls.
+- **AI Chat Silent / Empty Response After Tool Execution**:
+  - Resolved an issue where the AI chatbot would execute multiple MCP tools and then fail to yield or display a text answer.
+  - Implemented a guaranteed final synthesis turn in `services/chat_service.py` that forces the LLM to summarize gathered tool outputs into a direct narrative answer if text was not already produced.
+  - Increased `max_tool_turns` from 5 to 8 to provide adequate tool calling headroom.
+  - Added UI fallback guards in `ui/chat.py` and `ui/comparison_chat.py` to prevent saving empty strings in message history and removed emojis from expander headers and status indicators.
+
+---
+
 ## 2026-09-15
 
 ### Added

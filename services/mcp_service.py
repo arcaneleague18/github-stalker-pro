@@ -614,6 +614,8 @@ class MCPClient:
                 res = requests.get(url, headers=headers, timeout=10)
                 res.raise_for_status()
                 orgs = [{"login": o.get("login"), "description": o.get("description")} for o in res.json()]
+                if not orgs:
+                    return "[] (User is not a member of any public organizations)"
                 return json.dumps(orgs, indent=2)
 
             elif tool_name == "list_user_activity":

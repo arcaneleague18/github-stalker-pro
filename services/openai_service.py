@@ -48,7 +48,7 @@ class OpenAIService:
     def stream_chat_with_tools(
         self,
         messages: list[dict[str, Any]],
-        tools: list[dict[str, Any]],
+        tools: Optional[list[dict[str, Any]]] = None,
         model: Optional[str] = None
     ) -> Generator[str | list[ToolCallLog], None, None]:
         """Stream a chat completion response from the local LLM with MCP tool calling support.
@@ -57,14 +57,15 @@ class OpenAIService:
             str: Text chunks as they arrive from the streaming response.
             list[ToolCallLog]: When the model requests tool execution, yields a list of tool call objects.
         """
-        client = self.get_client()
-        target_model = model or settings.openai_model
-
-        logger.info(f"Initiating LLM stream using model '{target_model}' with {len(tools)} available MCP tools")
-
         try:
-            # Prepare arguments; omit tools parameter if list is empty
-            kwargs = {
+            client = self.get_client()
+            target_model = model or settings.openai_model
+            num_tools = len(tools) if tools is not None else 0
+
+            logger.info(f"Initiating LLM stream using model '{target_model}' with {num_tools} available MCP tools")
+
+            # Prepare arguments; omit tools parameter if list is empty or None
+            kwargs: dict[str, Any] = {
                 "model": target_model,
                 "messages": messages,
                 "stream": True,

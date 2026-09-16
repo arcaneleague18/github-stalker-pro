@@ -59,13 +59,15 @@ def render_comparison_chat(dev1: str, dev2: str):
             with st.chat_message(msg.role):
                 if msg.content:
                     st.markdown(msg.content, unsafe_allow_html=True)
+                elif msg.role == "assistant":
+                    st.markdown("*(Inspection completed using GitHub MCP tools — see execution log below)*")
 
                 # Render any executed MCP tool logs in an expandable block
                 if msg.tool_calls:
-                    with st.expander(f"🛠️ Executed {len(msg.tool_calls)} MCP Tool(s)", expanded=False):
+                    with st.expander(f"Executed {len(msg.tool_calls)} MCP Tool(s)", expanded=False):
                         for tc in msg.tool_calls:
-                            status_icon = "✅" if tc.status == "success" else "❌"
-                            st.markdown(f"**{status_icon} `{tc.tool_name}`**")
+                            status_label = "[SUCCESS]" if tc.status == "success" else "[ERROR]"
+                            st.markdown(f"**{status_label} `{tc.tool_name}`**")
                             st.code(f"Arguments: {json.dumps(tc.arguments, indent=2)}", language="json")
                             if tc.result:
                                 res_preview = tc.result[:400] + "..." if len(tc.result) > 400 else tc.result
@@ -98,6 +100,14 @@ def render_comparison_chat(dev1: str, dev2: str):
                 full_response = st.write_stream(stream_gen)
 
             tool_logs = chat_service.get_last_tool_logs()
+            
+            # Ensure full_response is never saved as empty string
+            if not full_response or not str(full_response).strip():
+                if tool_logs:
+                    full_response = "*(Completed MCP cross-developer inspection — see tool details below)*"
+                else:
+                    full_response = "No response was generated. Please try asking again."
+
             session_service.add_compare_message("assistant", full_response, tool_calls=tool_logs)
 
         st.rerun()
