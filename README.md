@@ -31,14 +31,97 @@ Unlike traditional AI applications,it dynamically connects to the **GitHub MCP (
 
 ## 🏗️ Architecture
 
-```
-Streamlit UI  <--->  Chat Service  <--->  OpenAI Responses API
-      |                                           |
-Dashboard UI                                (Tool Calls)
-      |                                           ↓
-GitHub Service <-----------------------> GitHub MCP Server
-                                                  ↓
-                                             GitHub API
+```mermaid
+flowchart TD
+
+subgraph group_presentation["Streamlit UI"]
+  node_app["Streamlit App<br/>entry point<br/>[app.py]"]
+  node_dashboard["Dashboard<br/>UI component<br/>[dashboard.py]"]
+  node_comparison_ui["Comparison Views<br/>UI component<br/>[comparison.py]"]
+  node_sidebar["Sidebar<br/>UI component<br/>[sidebar.py]"]
+  node_chat_ui["Chat View<br/>UI component<br/>[chat.py]"]
+  node_styles["Local Stylesheet<br/>theme asset<br/>[styles.css]"]
+  node_comparison_chat["Comparison Chat<br/>UI component<br/>[comparison_chat.py]"]
+end
+
+subgraph group_application["Application Services"]
+  node_github_service["GitHub Service<br/>domain service<br/>[github_service.py]"]
+  node_chat_service["Chat Orchestrator<br/>conversation service<br/>[chat_service.py]"]
+  node_session["Session Service<br/>state manager<br/>[session_service.py]"]
+end
+
+subgraph group_domain["State &amp; Models"]
+  node_github_models["GitHub Models<br/>domain schemas<br/>[github_models.py]"]
+  node_chat_models["Chat Models<br/>domain schemas<br/>[chat_models.py]"]
+end
+
+subgraph group_integrations["AI &amp; GitHub Integrations"]
+  node_config["Environment Config<br/>configuration<br/>[config.py]"]
+  node_openai_service["OpenAI Service<br/>AI client<br/>[openai_service.py]"]
+  node_mcp_service["MCP Service<br/>tool transport<br/>[mcp_service.py]"]
+  node_openai_api{{"OpenAI-Compatible API<br/>external AI API"}}
+  node_mcp_server{{"GitHub MCP Server<br/>child process"}}
+  node_github_api{{"GitHub HTTP API<br/>external API"}}
+end
+
+node_app -->|"composes"| node_dashboard
+node_app -->|"composes"| node_comparison_ui
+node_app -->|"composes"| node_sidebar
+node_app -->|"composes"| node_chat_ui
+node_app -->|"applies"| node_styles
+node_app -->|"composes"| node_comparison_chat
+
+node_dashboard --->|"loads analytics"| node_github_service
+node_github_service --->|"normalizes data"| node_github_models
+node_chat_service --->|"uses message schemas"| node_chat_models
+
+node_chat_ui --->|"sends prompts"| node_chat_service
+node_sidebar --->|"updates target and focus"| node_session
+node_chat_ui --->|"renders history and logs"| node_session
+node_app --->|"initializes"| node_session
+node_chat_service -->|"uses context and records results"| node_session
+
+node_session ~~~ node_config
+node_chat_models ~~~ node_openai_service
+
+node_config -->|"provides API settings"| node_openai_service
+node_config -->|"provides token and command"| node_mcp_service
+
+node_chat_service --->|"streams model turns"| node_openai_service
+node_chat_service --->|"executes requested tools"| node_mcp_service
+node_github_service --->|"requests GitHub tools"| node_mcp_service
+
+node_openai_service -->|"Responses API"| node_openai_api
+node_mcp_service -->|"JSON-RPC over stdio"| node_mcp_server
+node_mcp_server -->|"GitHub tool access"| node_github_api
+node_mcp_service -.->|"REST fallback"| node_github_api
+
+click node_app "https://github.com/arcaneleague18/github-stalker-pro/blob/main/app.py"
+click node_sidebar "https://github.com/arcaneleague18/github-stalker-pro/blob/main/ui/sidebar.py"
+click node_dashboard "https://github.com/arcaneleague18/github-stalker-pro/blob/main/ui/dashboard.py"
+click node_chat_ui "https://github.com/arcaneleague18/github-stalker-pro/blob/main/ui/chat.py"
+click node_comparison_ui "https://github.com/arcaneleague18/github-stalker-pro/blob/main/ui/comparison.py"
+click node_comparison_chat "https://github.com/arcaneleague18/github-stalker-pro/blob/main/ui/comparison_chat.py"
+click node_styles "https://github.com/arcaneleague18/github-stalker-pro/blob/main/assets/styles.css"
+click node_session "https://github.com/arcaneleague18/github-stalker-pro/blob/main/services/session_service.py"
+click node_github_service "https://github.com/arcaneleague18/github-stalker-pro/blob/main/services/github_service.py"
+click node_chat_service "https://github.com/arcaneleague18/github-stalker-pro/blob/main/services/chat_service.py"
+click node_github_models "https://github.com/arcaneleague18/github-stalker-pro/blob/main/models/github_models.py"
+click node_chat_models "https://github.com/arcaneleague18/github-stalker-pro/blob/main/models/chat_models.py"
+click node_config "https://github.com/arcaneleague18/github-stalker-pro/blob/main/config.py"
+click node_openai_service "https://github.com/arcaneleague18/github-stalker-pro/blob/main/services/openai_service.py"
+click node_mcp_service "https://github.com/arcaneleague18/github-stalker-pro/blob/main/services/mcp_service.py"
+
+classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+
+class node_app,node_sidebar,node_dashboard,node_chat_ui,node_comparison_ui,node_comparison_chat,node_styles toneBlue
+class node_session,node_github_service,node_chat_service toneAmber
+class node_github_models,node_chat_models toneMint
+class node_config,node_openai_service,node_mcp_service,node_mcp_server,node_github_api,node_openai_api toneRose
 ```
 
 ### Architectural Principles

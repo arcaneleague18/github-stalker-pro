@@ -2,6 +2,14 @@
 
 All notable changes to the **GitHub Stalker Pro** project are documented here chronologically by date.
 
+## 2026-09-17
+
+### Changed
+- **Architecture Diagram in Documentation**:
+  - Restructured the Mermaid flowchart in `README.md` with hierarchical rank ordering and multi-rank inter-layer connectors, ensuring the diagram renders with comfortable vertical height and balanced subsystem alignment (`Streamlit UI` on top, `Application Services` in the middle, `State & Models` bottom-left, and `AI & GitHub Integrations` bottom-right) without horizontal compression.
+
+---
+
 ## 2026-09-16
 
 ### Added
